@@ -6,39 +6,30 @@ using System.Text.Json;
 
 namespace BeyondTrustConnector.Service
 {
-    public partial class BeyondTrustService(IHttpClientFactory httpClientFactory, ILogger<BeyondTrustService> logger)
+    public class BeyondTrustService(IHttpClientFactory httpClientFactory, ILogger<BeyondTrustService> logger)
     {
-        private async Task<string> GetAccessToken(string beyondTrustTenantName)
+        
+        public async Task DownloadReportAsync(string report)
         {
-            var secret = await SecretReader.GetSecretAsync("BeyondTrustApi");
-            var credential = JsonSerializer.Deserialize<BeyondTrustCredential>(secret);
-            if (credential is null)
-            {
-                throw new Exception("Failed to deserialize BeyondTrust credential");
-            }
-            var client = httpClientFactory.CreateClient();
-            var basicAuth = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{credential.ClientId}:{credential.ClientSecret}"));
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", basicAuth);
-            var response = await client.PostAsync($"https://{beyondTrustTenantName}.beyondtrustcloud.com/oauth2/token", new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                { "grant_type", "client_credentials" }
-            }));
+            var client = httpClientFactory.CreateClient(nameof(BeyondTrustConnector));
+            var response = await client.GetAsync($"/api/reporting/v1/{report}");
             if (!response.IsSuccessStatusCode)
             {
                 var message = await response.Content.ReadAsStringAsync();
-                logger.LogError($"Failed to get access token: {message}");
-                throw new Exception("Failed to get access token");
+                logger.LogError($"Failed to download report: {message}");
+                throw new Exception("Failed to download report");
             }
-            var token = await response.Content.ReadFromJsonAsync<BeyondTrustAccessToken>();
-            return token?.AccessToken ?? throw new Exception("Failed to get access token");
+            var reportData = await response.Content.ReadAsByteArrayAsync();
+            var reportName = report.Split('/').Last();
+            var path = Path.Combine(Path.GetTempPath(), reportName);
+            await File.WriteAllBytesAsync(path, reportData);
+            logger.LogInformation($"Downloaded report to {path}");
         }
+
         private async Task<TEntity> GetItem<TEntity>(string endpoint, string query)
         {
-            var beyondTrustTenantName = Environment.GetEnvironmentVariable("BEYONDTRUST_TENANT") ?? throw new Exception("BEYONDTRUST_TENANT environment variable is not set");
-            var token = await GetAccessToken(beyondTrustTenantName);
-            var client = httpClientFactory.CreateClient();
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            var response = await client.GetAsync($"https://{beyondTrustTenantName}.beyondtrustcloud.com/api/config/v1/{endpoint}/{query}");
+            var client = httpClientFactory.CreateClient(nameof(BeyondTrustConnector));
+            var response = await client.GetAsync($"/api/config/v1/{endpoint}/{query}");
             if (!response.IsSuccessStatusCode)
             {
                 var message = await response.Content.ReadAsStringAsync();
@@ -51,11 +42,8 @@ namespace BeyondTrustConnector.Service
 
         private async IAsyncEnumerable<TEntity> GetItems<TEntity>(string endpoint)
         {
-            var beyondTrustTenantName = Environment.GetEnvironmentVariable("BEYONDTRUST_TENANT") ?? throw new Exception("BEYONDTRUST_TENANT environment variable is not set");
-            var token = await GetAccessToken(beyondTrustTenantName);
-            var client = httpClientFactory.CreateClient();
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            var response = await client.GetAsync($"https://{beyondTrustTenantName}.beyondtrustcloud.com/api/config/v1/{endpoint}");
+            var client = httpClientFactory.CreateClient(nameof(BeyondTrustConnector));
+            var response = await client.GetAsync($"/api/config/v1/{endpoint}");
             if (!response.IsSuccessStatusCode)
             {
                 var message = await response.Content.ReadAsStringAsync();
