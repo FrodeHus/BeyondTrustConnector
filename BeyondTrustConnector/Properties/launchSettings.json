@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "BeyondTrustConnector": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7047"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "containerRunArguments": "--init",
+      "httpPort": 30734,
+      "useSSL": false
+    }
+  }
+}
