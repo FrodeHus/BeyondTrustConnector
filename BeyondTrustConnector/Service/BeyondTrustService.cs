@@ -1,5 +1,7 @@
 ﻿using BeyondTrustConnector.Model;
+using BeyondTrustConnector.Parser;
 using Microsoft.Extensions.Logging;
+using System.IO.Compression;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
@@ -9,10 +11,10 @@ namespace BeyondTrustConnector.Service
     public class BeyondTrustService(IHttpClientFactory httpClientFactory, ILogger<BeyondTrustService> logger)
     {
         
-        public async Task DownloadReportAsync(string report)
+        public async Task<byte[]> DownloadReportAsync(string report)
         {
             var client = httpClientFactory.CreateClient(nameof(BeyondTrustConnector));
-            var response = await client.GetAsync($"/api/reporting/v1/{report}");
+            var response = await client.GetAsync($"/api/reporting?generate_report={report}");
             if (!response.IsSuccessStatusCode)
             {
                 var message = await response.Content.ReadAsStringAsync();
@@ -20,10 +22,7 @@ namespace BeyondTrustConnector.Service
                 throw new Exception("Failed to download report");
             }
             var reportData = await response.Content.ReadAsByteArrayAsync();
-            var reportName = report.Split('/').Last();
-            var path = Path.Combine(Path.GetTempPath(), reportName);
-            await File.WriteAllBytesAsync(path, reportData);
-            logger.LogInformation($"Downloaded report to {path}");
+            return reportData;
         }
 
         private async Task<TEntity> GetItem<TEntity>(string endpoint, string query)

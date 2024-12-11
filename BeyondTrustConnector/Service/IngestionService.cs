@@ -9,6 +9,10 @@ public class IngestionService(ILogger<IngestionService> logger)
 {
     private readonly ILogger<IngestionService> _logger = logger;
 
+    public async Task IngestSyslog(List<string> events)
+    {
+        await Ingest("Syslog", events);
+    }
 
 
     private async Task Ingest<TItem>(string tableName, List<TItem> items)

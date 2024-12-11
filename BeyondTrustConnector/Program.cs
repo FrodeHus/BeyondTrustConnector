@@ -2,7 +2,9 @@ using BeyondTrustConnector.Service;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("BeyondTrustConnector.Tests")]
 var builder = FunctionsApplication.CreateBuilder(args);
 builder.Services.AddTransient<BeyondTrustCredentialClient>();
 builder.Services.AddHttpClient(nameof(BeyondTrustConnector), (provider,client)=>
