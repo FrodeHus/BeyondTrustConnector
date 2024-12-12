@@ -1,6 +1,6 @@
 ﻿using Azure.Identity;
 using Azure.Monitor.Ingestion;
-using BeyondTrustConnector.Model;
+using BeyondTrustConnector.Parser;
 using Microsoft.Extensions.Logging;
 
 namespace BeyondTrustConnector.Service;
@@ -9,26 +9,28 @@ public class IngestionService(ILogger<IngestionService> logger)
 {
     private readonly ILogger<IngestionService> _logger = logger;
 
-    public async Task IngestSyslog(List<string> events)
+    public async Task IngestSyslog(List<BeyondTrustLogEntry> events)
     {
-        await Ingest("Syslog", events);
+        await Ingest("BeyondTrustEvents_CL", events);
     }
 
 
     private async Task Ingest<TItem>(string tableName, List<TItem> items)
     {
-        var endpoint = new Uri($"https://ve-secops-endpoint-13g1.northeurope-1.ingest.monitor.azure.com");
+        var dcrEndpoint = Environment.GetEnvironmentVariable("DCR_ENDPOINT") ?? throw new Exception("Variable not set: DCR_ENDPOINT");
+        var dcrId = Environment.GetEnvironmentVariable("DCR_ID") ?? throw new Exception("Variable not set: DCR_ID");
+        var endpoint = new Uri(dcrEndpoint);
         var creds = new DefaultAzureCredential();
         var client = new LogsIngestionClient(endpoint, creds);
-        var response = await client.UploadAsync("dcr-d70c743ae56c43c2ae137477830260ad", $"Custom-{tableName}", items);
+        var response = await client.UploadAsync(dcrId, $"Custom-{tableName}", items);
 
         if (response.IsError)
         {
-            _logger.LogError($"Failed to upload data: {response.ReasonPhrase}");
+            _logger.LogError("Failed to upload data: {ErrorReason}", response.ReasonPhrase);
         }
         else
         {
-            _logger.LogInformation($"Uploaded {items.Count} records");
+            _logger.LogInformation("Uploaded {ItemCount} records to {TableName}", items.Count, tableName);
         }
     }
 }

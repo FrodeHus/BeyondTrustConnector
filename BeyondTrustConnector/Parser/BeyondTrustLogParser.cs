@@ -9,18 +9,30 @@ internal class BeyondTrustLogParser(string log)
         var parser = new SyslogParser(log);
         foreach(var entry in parser.Entries)
         {
+            var details = ParsePayload(entry.Payload);
             var beyondTrustLogEntry = new BeyondTrustLogEntry
             {
-                Timestamp = entry.Timestamp,
+                Timestamp = UnixTimeStampToDateTimeUTC(int.Parse(details["when"])),
                 CorrelationId = entry.CorrelationId,
                 SiteId = entry.SiteId,
                 SegmentId = entry.SegmentNumber,
-                SegmentCount = entry.SegmentCount
+                SegmentCount = entry.SegmentCount,
+                EventType = details["event"],
+                Hostname = entry.Hostname
             };
-            beyondTrustLogEntry.Details = ParsePayload(entry.Payload);
+            details.Remove("event");
+            details.Remove("when");
+            beyondTrustLogEntry.AdditionalData =details;
             entries.Add(beyondTrustLogEntry);
         }
         return entries;
+    }
+
+    private static DateTime UnixTimeStampToDateTimeUTC(long unixTimeStamp)
+    {
+        DateTime dateTime = new(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+        dateTime = dateTime.AddSeconds(unixTimeStamp);
+        return dateTime;
     }
 
     private static Dictionary<string, string> ParsePayload(string payload)

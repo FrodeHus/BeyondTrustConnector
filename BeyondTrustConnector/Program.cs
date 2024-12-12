@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("BeyondTrustConnector.Tests")]
 var builder = FunctionsApplication.CreateBuilder(args);
 builder.Services.AddTransient<BeyondTrustCredentialClient>();
+builder.Services.AddTransient<QueryService>();
 builder.Services.AddHttpClient(nameof(BeyondTrustConnector), (provider,client)=>
 {
     var beyondTrustCredentialClient = provider.GetRequiredService<BeyondTrustCredentialClient>();
