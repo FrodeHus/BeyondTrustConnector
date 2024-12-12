@@ -1,139 +1,87 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
+using System.Text.RegularExpressions;
 
-namespace BeyondTrustConnector.Parser
+namespace BeyondTrustConnector.Parser;
+
+internal partial class SyslogParser
 {
-    internal class SyslogParser
+    [GeneratedRegex(@"(?<month>[A-Za-z]{3})\s(?<timestamp>\d{2}\s\d{2}:\d{2}:\d{2})\s(?<hostname>[a-z]+)\sBG\[(?<correlationId>\d{1,7})\]:\s(?<siteId>\d{1,5}):(?<segmentNumber>\d{2}):(?<segmentCount>\d{2}):(?<payload>.+)", RegexOptions.Compiled)]
+    private static partial Regex SyslogRegex();
+    internal List<SyslogEntry> Entries { get; } = [];
+    internal SyslogParser(string log)
     {
-        private int Position = 0;
-        private List<SyslogToken> _tokens = [];
-        internal SyslogParser(string log)
+        using var reader = new StringReader(log) ?? throw new ArgumentNullException(nameof(log));
+        string? line;
+        SyslogEntry? entry = null;
+        while ((line = reader.ReadLine()) != null)
         {
-            var lexer = new SyslogLexer(log);
-            SyslogToken token;
-            do
+            if (entry != null && entry.SegmentNumber != entry.SegmentCount)
             {
-                token = lexer.Lex();
-                _tokens.Add(token);
-            } while (token.Kind != SyslogTokenKind.EndOfLogToken);
+                entry = Parse(line, entry);
+            }
+            else
+            {
+                entry = Parse(line);
+            }
+
+            if (entry != null && entry.SegmentNumber == entry.SegmentCount)
+            {
+                Entries.Add(entry);
+            }
         }
 
-        internal SyslogToken Peek(int offset = 0)
+    }
+
+    private static SyslogEntry? Parse(string line, SyslogEntry? entry = null)
+    {
+        if (line == null)
         {
-            var index = Position + offset;
-            if (index >= _tokens.Count)
-            {
-                return new SyslogToken(SyslogTokenKind.EndOfLogToken, index, null);
-            }
-            return _tokens[index];
+            return null;
         }
 
-        internal SyslogToken LookAhead => Peek(1);
-        internal SyslogToken Current => Peek();
-
-        internal SyslogToken NextToken()
+        var match = SyslogRegex().Match(line);
+        if (!match.Success)
         {
-            if (Position >= _tokens.Count)
-            {
-                return new SyslogToken(SyslogTokenKind.EndOfLogToken, Position, "");
-            }
-            return _tokens[Position++];
-        }
-        internal SyslogToken MatchToken(SyslogTokenKind kind)
-        {
-            if (Position >= _tokens.Count)
-            {
-                return new SyslogToken(SyslogTokenKind.EndOfLogToken, Position, "");
-            }
-            var token = _tokens[Position++];
-            if (token.Kind != kind)
-            {
-                return SyslogToken.BadToken(token.Position);
-            }
-            return token;
+            return null;
         }
 
-        internal SyslogToken? SkipUntil(SyslogTokenKind kind)
+        var month = match.Groups["month"].Value;
+        var timestamp = match.Groups["timestamp"].Value;
+        var hostname = match.Groups["hostname"].Value;
+        var correlationId = int.Parse(match.Groups["correlationId"].Value);
+        var siteId = int.Parse(match.Groups["siteId"].Value);
+        var segmentNumber = int.Parse(match.Groups["segmentNumber"].Value);
+        var segmentCount = int.Parse(match.Groups["segmentCount"].Value);
+        var payload = match.Groups["payload"].Value;
+        if (entry != null)
         {
-            SyslogToken? token = null;
-            while (Current.Kind != SyslogTokenKind.EndOfLogToken)
-            {
-                if (Current.Kind == kind)
-                {
-                    token = Current;
-                    break;
-                }
-                Position++;
-            }
-            Position++;
-            return token;
+            entry.Payload += payload;
+            entry.SegmentNumber = segmentNumber;
+            return entry;
         }
 
-        internal Expression ParseExpression()
+        entry = new SyslogEntry
         {
-            Expression expression = Expression.Bad;
-            if (Current.Kind == SyslogTokenKind.TimestampToken)
-            {
-                expression = new TimestampExpression(Current.Value);
-            }
-            else if (Current.Kind == SyslogTokenKind.WordToken && Current.Value == "BG")
-            {
-                Position += 2;
-                var correlationId = Current.Value;
-                Position += 2;
-                expression = new CorrelationExpression(int.Parse(correlationId));
-            }
-            else if (TryParseKeyValueExpression(out var keyValueExpression))
-            {
-                expression = keyValueExpression!;
-            }
-            else if (Current.Kind == SyslogTokenKind.WordToken)
-            {
-                expression = new LiteralValueExpression(Current.Value);
-            }
-            Position++;
-            return expression;
-        }
+            Timestamp = DateTime.ParseExact($"{month} {timestamp}", "MMM dd HH:mm:ss", CultureInfo.InvariantCulture),
+            Hostname = hostname,
+            CorrelationId = correlationId,
+            SiteId = siteId,
+            SegmentNumber = segmentNumber,
+            SegmentCount = segmentCount,
+            Payload = payload
+        };
+        return entry;
+    }
 
-        private bool TryParseKeyValueExpression(out KeyValueExpression? expression)
-        {
-            if (Current.Kind != SyslogTokenKind.WordToken || LookAhead.Kind != SyslogTokenKind.EqualToken
-                                                           && Peek(2).Kind != SyslogTokenKind.EqualToken)
-            {
-                expression = null;
-                return false;
-            }
-            var value = new StringBuilder();
-
-            while (Current.Kind != SyslogTokenKind.EqualToken)
-            {
-                value.Append(Current.Value);
-                Position++;
-            }
-            var keyExpression = new KeyExpression(value.ToString());
-            Position++;
-            value.Clear();
-            while (Current.Kind is not SyslogTokenKind.NewLineToken and not SyslogTokenKind.EndOfLogToken and not SyslogTokenKind.SemiColonToken)
-            {
-                if (Current.Kind == SyslogTokenKind.BackslashToken)
-                {
-                    value.Append(Current.Value);
-                    value.Append(LookAhead.Value);
-                    Position += 2;
-                }
-                value.Append(Current.Value);
-                Position++;
-            }
-            var valueExpression = new LiteralValueExpression(value.ToString());
-            expression = new KeyValueExpression(keyExpression, valueExpression);
-            return true;
-        }
-
-        internal IEnumerable<Expression> Parse()
-        {
-            do
-            {
-                yield return ParseExpression();
-            } while (Position < _tokens.Count);
-        }
+    internal class SyslogEntry
+    {
+        public DateTime Timestamp { get; set; }
+        public required string Hostname { get; set; }
+        public int CorrelationId { get; set; }
+        public int SiteId { get; set; }
+        public int SegmentNumber { get; set; }
+        public int SegmentCount { get; set; }
+        public required string Payload { get; set; }
     }
 }

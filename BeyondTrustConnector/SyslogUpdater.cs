@@ -16,6 +16,8 @@ namespace BeyondTrustConnector
             ZipArchive archive = new(new MemoryStream(syslogArchiveData));
             foreach (var entry in archive.Entries)
             {
+                if (entry.Name.EndsWith("gz")) continue;
+
                 logger.LogInformation("Reading {ZipEntry}", entry.Name);
                 await using var entryStream = entry.Open();
                 using var reportReader = new StreamReader(entryStream);
@@ -23,6 +25,7 @@ namespace BeyondTrustConnector
                 var parser = new BeyondTrustLogParser(reportContent);
                 var events = parser.Parse();
                 var filteredEvents = events.Where(e => e.Details.ContainsKey("who") && !e.Details["who"].StartsWith("Sentinel integration") && e.Details["event"] != "syslog_report_generated");
+                logger.LogInformation("Found {EventCount} total events - filtered to {FilteredEventCount}", events.Count, filteredEvents.Count());
             }
 
         }

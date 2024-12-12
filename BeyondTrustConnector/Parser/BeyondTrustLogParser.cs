@@ -1,4 +1,5 @@
-﻿namespace BeyondTrustConnector.Parser;
+﻿
+namespace BeyondTrustConnector.Parser;
 
 internal class BeyondTrustLogParser(string log)
 {
@@ -6,39 +7,30 @@ internal class BeyondTrustLogParser(string log)
     {
         var entries = new List<BeyondTrustLogEntry>();
         var parser = new SyslogParser(log);
-        var expressions = parser.Parse().Where(entry => entry.Kind != ExpressionKind.BadExpression);
-        BeyondTrustLogEntry? entry = null;
-        foreach (var expression in expressions)
+        foreach(var entry in parser.Entries)
         {
-            if (expression.Kind == ExpressionKind.TimestampExpression)
+            var beyondTrustLogEntry = new BeyondTrustLogEntry
             {
-                if (entry != null)
-                {
-                    entries.Add(entry);
-                }
-                entry = new BeyondTrustLogEntry
-                {
-                    Timestamp = ((TimestampExpression)expression).Value!.Value
-                };
-            }
-            if (entry == null)
-            {
-                continue;
-            }
-            if (expression.Kind == ExpressionKind.KeyValueExpression)
-            {
-                var keyValue = (KeyValueExpression)expression;
-                entry.Details.Add(((KeyExpression)keyValue.Key).Key, ((LiteralValueExpression)keyValue.Value).Value);
-            }
-            if(expression.Kind == ExpressionKind.CorrelationExpression)
-            {
-                entry.CorrelationId = ((CorrelationExpression)expression).CorrelationId;
-            }
-        }
-        if (entry != null)
-        {
-            entries.Add(entry);
+                Timestamp = entry.Timestamp,
+                CorrelationId = entry.CorrelationId,
+                SiteId = entry.SiteId,
+                SegmentId = entry.SegmentNumber,
+                SegmentCount = entry.SegmentCount
+            };
+            beyondTrustLogEntry.Details = ParsePayload(entry.Payload);
+            entries.Add(beyondTrustLogEntry);
         }
         return entries;
+    }
+
+    private static Dictionary<string, string> ParsePayload(string payload)
+    {
+        var details = new Dictionary<string, string>();
+        var payloadParser = new PayloadParser(payload);
+        foreach (var (Key, Value) in payloadParser.Parse())
+        {
+            details.Add(Key, Value);
+        }
+        return details;
     }
 }

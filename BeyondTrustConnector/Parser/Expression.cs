@@ -2,6 +2,20 @@
 
 namespace BeyondTrustConnector.Parser;
 
+internal class PayloadExpression: Expression
+{
+    internal List<SyslogToken> Tokens { get; } = [];
+    public override ExpressionKind Kind => ExpressionKind.PayloadExpression;
+}
+
+[DebuggerDisplay("{SiteId}:{SegmentId}:{SegmentCount}")]
+internal class SegmentInformationExpression(int siteId, int segmentId, int segmentCount) : Expression
+{
+    internal int SiteId { get; } = siteId;
+    internal int SegmentId { get; } = segmentId;
+    internal int SegmentCount { get; } = segmentCount;
+    public override ExpressionKind Kind => ExpressionKind.SegmentInformationExpression;
+}
 [DebuggerDisplay("{CorrelationId}")]
 internal class CorrelationExpression(int correlationId) : Expression
 {
@@ -64,7 +78,7 @@ internal class BadExpression : Expression
 internal abstract class Expression
 {
     public static Expression Bad => new BadExpression();
-    
+
     public abstract ExpressionKind Kind { get; }
 }
 
@@ -76,5 +90,7 @@ internal enum ExpressionKind
     LiteralValueExpression,
     KeyValueExpression,
     KeyExpression,
-    CorrelationExpression
+    CorrelationExpression,
+    SegmentInformationExpression,
+    PayloadExpression
 }
