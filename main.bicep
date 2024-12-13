@@ -25,7 +25,7 @@ resource Custom_Table_BeyondTrustVaultActivity_CL 'Microsoft.OperationalInsights
             type: 'string'
           }
           {
-            name: 'VaultAccount'
+            name: 'VaultAccountId'
             type: 'int'
           }
           {
@@ -132,7 +132,7 @@ resource dataCollectionRules_dcr_beyondtrust_name_resource 'Microsoft.Insights/d
             type: 'string'
           }
           {
-            name: 'VaultAccount'
+            name: 'VaultAccountId'
             type: 'int'
           }
           {
