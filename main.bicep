@@ -36,6 +36,46 @@ resource dataCollectionRules_dcr_beyondtrust_name_resource 'Microsoft.Insights/d
           }
         ]
       }
+      'Custom-BeyondTrustAccessSession_CL': {
+        columns: [
+          {
+            name: 'StartTime'
+            type: 'datetime'
+          }
+          {
+            name: 'EndTime'
+            type: 'datetime'
+          }
+          {
+            name: 'SessionId'
+            type: 'string'
+          }
+          {
+            name: 'SessionType'
+            type: 'string'
+          }
+          {
+            name: 'JumpItemId'
+            type: 'int'
+          }
+          {
+            name: 'JumpItemAddress'
+            type: 'string'
+          }
+          {
+            name: 'JumpGroup'
+            type: 'string'
+          }
+          {
+            name: 'Jumpoint'
+            type: 'string'
+          }
+          {
+            name: 'UserDetails'
+            type: 'dynamic'
+          }
+        ]
+      }
     }
     dataSources: {}
     destinations: {
@@ -54,8 +94,18 @@ resource dataCollectionRules_dcr_beyondtrust_name_resource 'Microsoft.Insights/d
         destinations: [
           '5a11abe40bfa40278b3cfec620c783f8'
         ]
-        transformKql: 'source\n| project-rename TimeGenerated=Timestamp\n| extend AdditionalData=Details\n'
+        transformKql: 'source\n| project-rename TimeGenerated=Timestamp\n'
         outputStream: 'Custom-BeyondTrustEvents_CL'
+      }
+      {
+        streams: [
+          'Custom-BeyondTrustAccessSession_CL'
+        ]
+        destinations: [
+          '5a11abe40bfa40278b3cfec620c783f8'
+        ]
+        transformKql: 'source\n| project-rename TimeGenerated=StartTime\n'
+        outputStream: 'Custom-BeyondTrustAccessSession_CL'
       }
     ]
   }

@@ -18,11 +18,8 @@ builder.Services.AddHttpClient(nameof(BeyondTrustConnector), (provider,client)=>
 });
 builder.Services.AddTransient<IngestionService>();
 builder.Services.AddTransient<BeyondTrustService>();
+builder.Services.AddApplicationInsightsTelemetryWorkerService();
 builder.ConfigureFunctionsWebApplication();
 
-// Application Insights isn't enabled by default. See https://aka.ms/AAt8mw4.
-// builder.Services
-//     .AddApplicationInsightsTelemetryWorkerService()
-//     .ConfigureFunctionsApplicationInsights();
 
 builder.Build().Run();

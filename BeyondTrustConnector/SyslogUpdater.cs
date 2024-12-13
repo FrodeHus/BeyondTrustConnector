@@ -11,11 +11,11 @@ namespace BeyondTrustConnector
     public class SyslogUpdater(BeyondTrustService beyondTrustService, IngestionService ingestionService, QueryService queryService, ILogger<SyslogUpdater> logger)
     {
         [Function(nameof(SyslogUpdater))]
-        public async Task Run([TimerTrigger("0 */5 * * * *", RunOnStartup = true)] TimerInfo myTimer)
+        public async Task Run([TimerTrigger("0 */15 * * * *", RunOnStartup = false)] TimerInfo myTimer)
         {
             var result = await queryService.QueryWorkspace("BeyondTrustEvents_CL | summarize arg_max(TimeGenerated,*) | project TimeGenerated");
             DateTime? lastEventTime = null;
-            if (result?.Table.Rows.Count == 1 && result?.Table.Rows[0].Count == 1)
+            if (result?.Table.Rows.Count == 1 && result?.Table.Rows[0][0] is not null)
             {
                 lastEventTime = ((DateTimeOffset)result.Table.Rows[0][0]).UtcDateTime;
             }

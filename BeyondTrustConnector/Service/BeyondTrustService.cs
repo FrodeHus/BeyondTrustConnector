@@ -1,16 +1,29 @@
 ﻿using BeyondTrustConnector.Model;
-using BeyondTrustConnector.Parser;
 using Microsoft.Extensions.Logging;
-using System.IO.Compression;
 using System.Net.Http.Json;
-using System.Text;
-using System.Text.Json;
+using System.Xml.Linq;
 
 namespace BeyondTrustConnector.Service
 {
     public class BeyondTrustService(IHttpClientFactory httpClientFactory, ILogger<BeyondTrustService> logger)
     {
-        
+        public async Task<XDocument> GetAccessSessionReport(DateTime start, int minimumSessionDuration = 0)
+        {
+            var client = httpClientFactory.CreateClient(nameof(BeyondTrustConnector));
+            var unixTime = ((DateTimeOffset)start).ToUnixTimeSeconds() + 1;
+            string requestUri = $"/api/reporting?generate_report=AccessSession&start_date={start:yyyy-MM-dd}&duration={minimumSessionDuration}&start_time={unixTime}";
+            var response = await client.GetAsync(requestUri);
+            if (!response.IsSuccessStatusCode)
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                logger.LogError("Failed to generate report: {ErrorMessage}", message);
+                throw new Exception("Failed to generate report");
+            }
+            var reportContent = await response.Content.ReadAsStringAsync();
+            
+            return XDocument.Parse(reportContent);
+        }
+
         public async Task<byte[]> DownloadReportAsync(string report)
         {
             var client = httpClientFactory.CreateClient(nameof(BeyondTrustConnector));
@@ -18,7 +31,7 @@ namespace BeyondTrustConnector.Service
             if (!response.IsSuccessStatusCode)
             {
                 var message = await response.Content.ReadAsStringAsync();
-                logger.LogError($"Failed to download report: {message}");
+                logger.LogError("Failed to download report: {ErrorMessage}", message);
                 throw new Exception("Failed to download report");
             }
             var reportData = await response.Content.ReadAsByteArrayAsync();
@@ -32,7 +45,7 @@ namespace BeyondTrustConnector.Service
             if (!response.IsSuccessStatusCode)
             {
                 var message = await response.Content.ReadAsStringAsync();
-                logger.LogError($"Failed to get configuration: {message}");
+                logger.LogError("Failed to get configuration: {ErrorMessage}", message);
                 throw new Exception("Failed to get configuration");
             }
             var item = await response.Content.ReadFromJsonAsync<TEntity>();
@@ -46,7 +59,7 @@ namespace BeyondTrustConnector.Service
             if (!response.IsSuccessStatusCode)
             {
                 var message = await response.Content.ReadAsStringAsync();
-                logger.LogError($"Failed to get configuration: {message}");
+                logger.LogError("Failed to get configuration: {ErrorMessage}", message);
                 throw new Exception("Failed to get configuration");
             }
             var links = ParseLinkHeader(response);

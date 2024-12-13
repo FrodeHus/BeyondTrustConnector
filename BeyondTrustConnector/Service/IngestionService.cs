@@ -1,5 +1,6 @@
 ﻿using Azure.Identity;
 using Azure.Monitor.Ingestion;
+using BeyondTrustConnector.Model;
 using BeyondTrustConnector.Parser;
 using Microsoft.Extensions.Logging;
 
@@ -14,6 +15,10 @@ public class IngestionService(ILogger<IngestionService> logger)
         await Ingest("BeyondTrustEvents_CL", events);
     }
 
+    internal async Task IngestAccessSessions(List<BeyondTrustAccessSession> sessions)
+    {
+        await Ingest("BeyondTrustAccessSession_CL", sessions);
+    }
 
     private async Task Ingest<TItem>(string tableName, List<TItem> items)
     {
