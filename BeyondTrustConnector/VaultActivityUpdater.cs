@@ -43,7 +43,7 @@ namespace BeyondTrustConnector
                 var userName = performedBy?.Value;
                 var vaultActivity = new BeyondTrustVaultActivity
                 {
-                    EventType = activity.Attribute("event_type")!.Value,
+                    EventType = eventType,
                     Timestamp = UnixTimeStampToDateTimeUTC(timestamp),
                     SessionId = sessionId,
                     VaultAccountId = int.Parse(activity.Attribute("account")!.Value),
