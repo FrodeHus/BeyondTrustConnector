@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/BeyondTrustConnector/Properties/ServiceDependencies/func-beyondtrust - Zip Deploy
+/BeyondTrustConnector/Properties/serviceDependencies.func-beyondtrust - Zip Deploy.json
