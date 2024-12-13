@@ -7,11 +7,11 @@ namespace BeyondTrustConnector.Service
 {
     public class BeyondTrustService(IHttpClientFactory httpClientFactory, ILogger<BeyondTrustService> logger)
     {
-        public async Task<XDocument> GetAccessSessionReport(DateTime start, int minimumSessionDuration = 0)
+        public async Task<XDocument> GetAccessSessionReport(DateTime start, int reportPeriod = 0)
         {
             var client = httpClientFactory.CreateClient(nameof(BeyondTrustConnector));
             var unixTime = ((DateTimeOffset)start).ToUnixTimeSeconds() + 1;
-            string requestUri = $"/api/reporting?generate_report=AccessSession&start_date={start:yyyy-MM-dd}&duration={minimumSessionDuration}&start_time={unixTime}";
+            string requestUri = $"/api/reporting?generate_report=AccessSession&start_date={start:yyyy-MM-dd}&duration={reportPeriod}&start_time={unixTime}";
             var response = await client.GetAsync(requestUri);
             if (!response.IsSuccessStatusCode)
             {
@@ -21,6 +21,23 @@ namespace BeyondTrustConnector.Service
             }
             var reportContent = await response.Content.ReadAsStringAsync();
             
+            return XDocument.Parse(reportContent);
+        }
+
+        public async Task<XDocument> GetVaultActivityReport(DateTime start, int reportPeriod = 0)
+        {
+            var client = httpClientFactory.CreateClient(nameof(BeyondTrustConnector));
+            var unixTime = ((DateTimeOffset)start).ToUnixTimeSeconds() + 1;
+            string requestUri = $"/api/reporting?generate_report=VaultAccountActivity&start_date={start:yyyy-MM-dd}&duration={reportPeriod}&start_time={unixTime}";
+            var response = await client.GetAsync(requestUri);
+            if (!response.IsSuccessStatusCode)
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                logger.LogError("Failed to generate report: {ErrorMessage}", message);
+                throw new Exception("Failed to generate report");
+            }
+            var reportContent = await response.Content.ReadAsStringAsync();
+
             return XDocument.Parse(reportContent);
         }
 

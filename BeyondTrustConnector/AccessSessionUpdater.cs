@@ -10,7 +10,7 @@ namespace BeyondTrustConnector
     public class AccessSessionUpdater(BeyondTrustService beyondTrustService, IngestionService ingestionService, QueryService queryService, ILogger<AccessSessionUpdater> logger)
     {
         [Function(nameof(AccessSessionUpdater))]
-        public async Task Run([TimerTrigger("0 */15 * * * *", RunOnStartup = true)] TimerInfo myTimer)
+        public async Task Run([TimerTrigger("0 */15 * * * *", RunOnStartup = false)] TimerInfo myTimer)
         {
             var result = await queryService.QueryWorkspace("BeyondTrustAccessSession_CL | summarize arg_max(TimeGenerated,*) | project TimeGenerated");
             DateTime? lastSessionTime = null;

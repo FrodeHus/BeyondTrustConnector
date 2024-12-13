@@ -20,6 +20,11 @@ public class IngestionService(ILogger<IngestionService> logger)
         await Ingest("BeyondTrustAccessSession_CL", sessions);
     }
 
+    internal async Task IngestVaultActivity(List<BeyondTrustVaultActivity> vaultActivities)
+    {
+        await Ingest("BeyondTrustVaultActivity_CL", vaultActivities);
+    }
+
     private async Task Ingest<TItem>(string tableName, List<TItem> items)
     {
         var dcrEndpoint = Environment.GetEnvironmentVariable("DCR_ENDPOINT") ?? throw new Exception("Variable not set: DCR_ENDPOINT");
