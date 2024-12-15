@@ -1,4 +1,11 @@
 using './main.bicep'
-param WorkspaceName  = 'LAW-BeyondTrust'
-param DataCollectionRuleName = 'dcr-beyondtrust'
-param DataCollectionEndpointName = 've-secops-endpoint'
+
+param datacollection  = {
+  ruleName: 'dcr-beyondtrust'
+  endpointName: 'beyondtrust-endpoint'
+  workspaceName: 'LAW-BeyondTrust-Test'
+}
+
+param functionConfig = {
+  name: 'beyondtrust-function'
+}
