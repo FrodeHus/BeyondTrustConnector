@@ -26,7 +26,11 @@ module functionappModule './modules/functionapp.bicep' = {
   params: {
     appName: functionConfig.name
     location: resourceGroup().location
-    workspaceId: datacollectionModule.outputs.workspaceResourceId
+    dataCollection: {
+      workspaceName: datacollectionModule.outputs.workspaceResourceId
+      endpointImmutableId: datacollectionModule.outputs.dcrImmutableId
+      endpointUri: datacollectionModule.outputs.logsIngestionEndpoint
+    }
   }
 }
 

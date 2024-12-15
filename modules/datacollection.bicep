@@ -292,3 +292,6 @@ resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' 
       Custom_Table_BeyondTrustVaultActivity_CL
   ]
 }
+
+output dcrImmutableId string = dataCollectionRule.properties.immutableId
+output logsIngestionEndpoint string = dataCollectionEndpoint.properties.logsIngestion.endpoint

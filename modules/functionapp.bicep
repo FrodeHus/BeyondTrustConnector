@@ -1,5 +1,11 @@
-@description('The ID of the workspace that the function app will connect to.')
-param workspaceId string
+type dataCollectionConfig = {
+  endpointImmutableId: string
+  endpointUri: string
+  workspaceName: string
+}
+
+param dataCollection dataCollectionConfig
+
 @description('The name of the function app that you wish to create.')
 param appName string = 'fnapp${uniqueString(resourceGroup().id)}'
 
@@ -84,7 +90,15 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         }
         {
           name: 'WORKSPACE_ID'
-          value: workspaceId
+          value: dataCollection.workspaceName
+        }
+        {
+          name: 'DCR_ID'
+          value: dataCollection.endpointImmutableId
+        }
+        {
+          name: 'DCR_ENDPOINT'
+          value: dataCollection.endpointUri
         }
       ]
       netFrameworkVersion: 'v9.0'  

@@ -3,10 +3,10 @@ using './main.bicep'
 param datacollection  = {
   ruleName: 'dcr-beyondtrust'
   endpointName: 'beyondtrust-endpoint'
-  workspaceName: 'LAW-BT'
+  workspaceName: 'LAW-BT-Test'
 }
 
 param functionConfig = {
   name: 'beyondtrust-function'
-  keyvaultName: 'beyondtrust-keyvault'
+  keyvaultName: 'beyondtrust-vault'
 }
