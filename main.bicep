@@ -32,12 +32,22 @@ module functionappModule './modules/functionapp.bicep' = {
 
 var principalId = functionappModule.outputs.managedIdentity
 
-module vaultSecretUserRoleAssignment './modules/role-assignment.bicep' = {
-  name: 'roleAssignment'
+module vaultSecretUserRoleAssignment './modules/vault-role-assignment.bicep' = {
+  name: 'vaultSecretUserRoleAssignment'
   params: {
     roleAssignmentName: '${uniqueString(functionConfig.name)}-keyvault-reader-role-assignment'
     roleDefinitionId: '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secret User
     principalId: principalId
     keyVaultName: functionConfig.keyvaultName
+  }
+}
+
+module workspaceReaderRoleAssignment './modules/workspace-role-assignment.bicep' = {
+  name: 'workspaceReaderRoleAssignment'
+  params: {
+    roleAssignmentName: '${uniqueString(functionConfig.name)}-workspace-reader-role-assignment'
+    roleDefinitionId: '73c42c96-874c-492b-b04d-ab87d138a893' // Log Analytics Reader
+    principalId: principalId
+    workspaceName: datacollection.workspaceName
   }
 }
