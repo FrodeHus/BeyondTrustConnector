@@ -250,7 +250,7 @@ resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' 
       logAnalytics: [
         {
           workspaceResourceId: workspaceResourceId
-          name: 'logAnalytics'
+          name: 'beyondTrustWorkspace'
         }
       ]
     }
@@ -260,7 +260,7 @@ resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' 
           'Custom-BeyondTrustEvents_CL'
         ]
         destinations: [
-          'logAnalytics'
+          'beyondTrustWorkspace'
         ]
         transformKql: 'source\n| project-rename TimeGenerated=Timestamp\n'
         outputStream: 'Custom-BeyondTrustEvents_CL'
@@ -270,7 +270,7 @@ resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' 
           'Custom-BeyondTrustAccessSession_CL'
         ]
         destinations: [
-          'logAnalytics'
+          'beyondTrustWorkspace'
         ]
         transformKql: 'source\n| project-rename TimeGenerated=StartTime\n'
         outputStream: 'Custom-BeyondTrustAccessSession_CL'
@@ -280,7 +280,7 @@ resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' 
           'Custom-BeyondTrustVaultActivity_CL'
         ]
         destinations: [
-          'logAnalytics'
+          'beyondTrustWorkspace'
         ]
         transformKql: 'source\n| project-rename TimeGenerated=Timestamp\n'
         outputStream: 'Custom-BeyondTrustVaultActivity_CL'
