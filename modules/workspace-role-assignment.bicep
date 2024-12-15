@@ -10,11 +10,15 @@ resource workspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existin
   name: workspaceName
 }
 
+resource workspaceRoleDefinition 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
+  name: roleDefinitionId
+}
+
 resource roleAssignment 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
-  name: roleAssignmentName
+  name: guid(roleAssignmentName)
   scope: workspace
   properties: {
-    roleDefinitionId: roleDefinitionId
+    roleDefinitionId: workspaceRoleDefinition.id
     principalId: principalId
     principalType: 'ServicePrincipal'
   }
