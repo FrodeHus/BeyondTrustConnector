@@ -8,4 +8,5 @@ param datacollection  = {
 
 param functionConfig = {
   name: 'beyondtrust-function'
+  keyvaultName: 'beyondtrust-keyvault'
 }

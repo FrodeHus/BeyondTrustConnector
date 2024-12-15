@@ -17,7 +17,7 @@ param location string = resourceGroup().location
 var functionAppName = appName
 var hostingPlanName = appName
 var applicationInsightsName = appName
-var storageAccountName = '${uniqueString(resourceGroup().id)}azfunctions'
+param storageAccountName string = '${uniqueString(resourceGroup().id)}azfunctions'
 var functionWorkerRuntime = 'dotnet-isolated'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
