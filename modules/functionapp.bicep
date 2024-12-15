@@ -88,7 +88,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         }
       ]
       netFrameworkVersion: 'v9.0'  
-      ftpsState: 'FtpsOnly'
+      ftpsState: 'Disabled'
       minTlsVersion: '1.2'
     }
     httpsOnly: true
@@ -102,6 +102,16 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   properties: {
     Application_Type: 'web'
     Request_Source: 'rest'
+  }
+}
+
+resource continuousIntegration 'Microsoft.Web/sites/sourcecontrols@2024-04-01' = {
+  parent: functionApp
+  name: 'web'
+  properties: {
+    branch: 'main'
+    isManualIntegration: true
+    repoUrl: 'https://github.com/FrodeHus/BeyondTrustConnector.git'
   }
 }
 

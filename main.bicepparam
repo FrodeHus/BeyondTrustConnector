@@ -3,7 +3,7 @@ using './main.bicep'
 param datacollection  = {
   ruleName: 'dcr-beyondtrust'
   endpointName: 'beyondtrust-endpoint'
-  workspaceName: 'LAW-BeyondTrust-Test'
+  workspaceName: 'LAW-BT'
 }
 
 param functionConfig = {
