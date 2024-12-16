@@ -1,5 +1,8 @@
 # BeyondTrustConnector
 
+[![Docker Image CI](https://github.com/FrodeHus/BeyondTrustConnector/actions/workflows/docker-image.yml/badge.svg)](https://github.com/FrodeHus/BeyondTrustConnector/actions/workflows/docker-image.yml)
+[![.NET](https://github.com/FrodeHus/BeyondTrustConnector/actions/workflows/dotnet.yml/badge.svg)](https://github.com/FrodeHus/BeyondTrustConnector/actions/workflows/dotnet.yml)
+
 Uses function app to pull reports from BeyondTrust API and push to a Azure Log Analytics Workspace.
 
 Requires:
