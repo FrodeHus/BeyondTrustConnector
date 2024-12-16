@@ -27,6 +27,8 @@ param storageAccountName string = '${uniqueString(resourceGroup().id)}azfunction
 param container string = 'frodehus/beyondtrustconnector:v1'
 param keyvaultName string
 param userAssignedIdentityId string
+param principalId string
+
 resource managedEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' = {
   name: appName
   location: location
@@ -100,6 +102,10 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
         {
             name: 'KEYVAULT_NAME'
             value:keyvaultName
+        }
+        {
+            name: 'PRINCIPAL_ID' 
+            value: principalId
         }
       ]
       ftpsState: 'FtpsOnly'

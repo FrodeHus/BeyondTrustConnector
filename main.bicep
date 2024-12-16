@@ -35,6 +35,7 @@ module functionappModule './modules/functionapp.bicep' = {
     location: resourceGroup().location
     keyvaultName: functionConfig.keyvaultName
     userAssignedIdentityId: userAssignedIdentity.id
+    principalId: userAssignedIdentity.properties.principalId
     dataCollection: {
       workspaceName: datacollectionModule.outputs.workspaceId
       endpointImmutableId: datacollectionModule.outputs.dcrImmutableId
