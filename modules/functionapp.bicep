@@ -25,6 +25,8 @@ var functionAppName = appName
 var applicationInsightsName = appName
 param storageAccountName string = '${uniqueString(resourceGroup().id)}azfunctions'
 param container string = 'frodehus/beyondtrustconnector:v1'
+param keyvaultName string
+param userAssignedIdentityId string
 resource managedEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' = {
   name: appName
   location: location
@@ -56,7 +58,10 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
   location: location
   kind: 'functionapp,linux,container,azurecontainerapps'
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${userAssignedIdentityId}': {}
+    }
   }
   properties: {
     managedEnvironmentId: managedEnvironment.id
@@ -92,6 +97,10 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
           name: 'BEYONDTRUST_TENANT'
           value: dataCollection.beyondTrustTenant
         }
+        {
+            name: 'KEYVAULT_NAME'
+            value:keyvaultName
+        }
       ]
       ftpsState: 'FtpsOnly'
       minTlsVersion: '1.2'
@@ -114,4 +123,3 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-output managedIdentity string = functionApp.identity.principalId

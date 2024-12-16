@@ -1,6 +1,7 @@
 param ruleName string
 param endpointName string
 param workspaceName string
+param principalId string
 
 resource law 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
   name: workspaceName
@@ -297,6 +298,20 @@ resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' 
   dependsOn:[
       Custom_Table_BeyondTrustVaultActivity_CL
   ]
+}
+
+resource metricPublisherRoleDefinition 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
+  name: '3913510d-42f4-4e42-8a64-420c390055eb'
+}
+
+resource metricPublisherRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
+  name: guid('metricPublisherRoleAssignment')
+  scope: dataCollectionRule
+  properties: {
+    roleDefinitionId: metricPublisherRoleDefinition.id
+    principalId: principalId
+    principalType: 'ServicePrincipal'
+  }
 }
 
 output dcrImmutableId string = dataCollectionRule.properties.immutableId
