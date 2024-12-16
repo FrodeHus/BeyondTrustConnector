@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /BeyondTrustConnector/Properties/ServiceDependencies/func-beyondtrust - Zip Deploy
 /BeyondTrustConnector/Properties/serviceDependencies.func-beyondtrust - Zip Deploy.json
+local.bicepparam
