@@ -25,10 +25,10 @@ module datacollectionModule './modules/datacollection.bicep' = {
 module functionappModule './modules/functionapp.bicep' = {
   name: 'functionapp'
   params: {
-    appName: functionConfig.name
+    appName: '${functionConfig.name}-${uniqueString(resourceGroup().name)}'
     location: resourceGroup().location
     dataCollection: {
-      workspaceName: datacollectionModule.outputs.workspaceResourceId
+      workspaceName: datacollectionModule.outputs.workspaceId
       endpointImmutableId: datacollectionModule.outputs.dcrImmutableId
       endpointUri: datacollectionModule.outputs.logsIngestionEndpoint
       beyondTrustTenant: beyondTrustTenant
@@ -62,7 +62,7 @@ module workspaceMetricPublisherRoleAssignment './modules/workspace-role-assignme
   name: 'workspaceMetricPublisherRoleAssignment'
   params: {
     roleAssignmentName: '${uniqueString(functionConfig.name)}-workspace-metric-publisher-role-assignment'
-    roleDefinitionId: '3913510d-42f4-4e42-8a64-420c390055eb' // Log Analytics Reader
+    roleDefinitionId: '3913510d-42f4-4e42-8a64-420c390055eb' 
     principalId: principalId
     workspaceName: datacollection.workspaceName
   }
