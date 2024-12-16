@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deploy", "deploy", "{F48F58
 		modules\datacollection.bicep = modules\datacollection.bicep
 		modules\functionapp.bicep = modules\functionapp.bicep
 		main.bicep = main.bicep
+		main.bicepparam = main.bicepparam
 		modules\vault-role-assignment.bicep = modules\vault-role-assignment.bicep
 		modules\workspace-role-assignment.bicep = modules\workspace-role-assignment.bicep
 	EndProjectSection

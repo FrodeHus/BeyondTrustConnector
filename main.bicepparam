@@ -2,11 +2,12 @@ using './main.bicep'
 param beyondTrustTenant = 'mytenant'
 param datacollection  = {
   ruleName: 'dcr-beyondtrust'
-  endpointName: 'beyondtrust-endpoint'
-  workspaceName: 'LAW-BT-Test'
+  endpointName: 'bt-endpoint'
+  workspaceName: 'LAW-BeyondTrust'
 }
 
 param functionConfig = {
-  name: 'beyondtrust-function'
-  keyvaultName: 'beyondtrust-vault'
+  name: 'func-btconnect'
+  keyvaultName: 'btvault'
+  container: 'frodehus/beyondtrustconnector:v1.2'
 }
