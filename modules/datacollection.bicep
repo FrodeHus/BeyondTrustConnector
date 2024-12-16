@@ -6,7 +6,7 @@ resource law 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
   name: workspaceName
 }
 
-output workspaceId string = law.id
+output workspaceId string = law.properties.customerId
 
 resource dataCollectionEndpoint 'Microsoft.Insights/dataCollectionEndpoints@2023-03-11' = {
   name: endpointName
@@ -21,7 +21,8 @@ resource dataCollectionEndpoint 'Microsoft.Insights/dataCollectionEndpoints@2023
 
 
 resource Custom_Table_BeyondTrustVaultActivity_CL 'Microsoft.OperationalInsights/workspaces/tables@2022-10-01' = {
-  name: '${workspaceName}/BeyondTrustVaultActivity_CL'
+  parent: law
+  name: 'BeyondTrustVaultActivity_CL'
   properties: {
     totalRetentionInDays: 30
     plan: 'Analytics'
@@ -59,7 +60,8 @@ resource Custom_Table_BeyondTrustVaultActivity_CL 'Microsoft.OperationalInsights
 }
 
 resource Custom_Table_BeyondTrustEvents_CL 'Microsoft.OperationalInsights/workspaces/tables@2022-10-01' = {
-  name: '${workspaceName}/BeyondTrustEvents_CL'
+  parent: law
+  name: 'BeyondTrustEvents_CL'
   properties: {
     totalRetentionInDays: 30
     plan: 'Analytics'
@@ -97,7 +99,8 @@ resource Custom_Table_BeyondTrustEvents_CL 'Microsoft.OperationalInsights/worksp
 }
 
 resource Custom_Table_BeyondTrustAccessSession_CL 'Microsoft.OperationalInsights/workspaces/tables@2022-10-01' = {
-  name: '${workspaceName}/BeyondTrustAccessSession_CL'
+  parent: law
+  name: 'BeyondTrustAccessSession_CL'
   properties: {
     totalRetentionInDays: 30
     plan: 'Analytics'
@@ -253,7 +256,7 @@ resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' 
     destinations: {
       logAnalytics: [
         {
-          workspaceResourceId: workspace.id
+          workspaceResourceId: law.id
           name: 'beyondTrustWorkspace'
         }
       ]
