@@ -107,6 +107,10 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
             name: 'PRINCIPAL_ID' 
             value: clientId
         }
+        {
+            name: 'AZURE_CLIENT_ID'
+            value: clientId
+        }
       ]
       ftpsState: 'FtpsOnly'
       minTlsVersion: '1.2'

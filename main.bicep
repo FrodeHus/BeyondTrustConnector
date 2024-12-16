@@ -7,6 +7,7 @@ type dataCollectionConfig = {
 type functionAppConfig = {
   name: string
   keyvaultName: string
+  container: string
 }
 
 param beyondTrustTenant string
@@ -36,6 +37,7 @@ module functionappModule './modules/functionapp.bicep' = {
     keyvaultName: functionConfig.keyvaultName
     userAssignedIdentityId: userAssignedIdentity.id
     clientId: userAssignedIdentity.properties.clientId
+    container: functionConfig.container
     dataCollection: {
       workspaceName: datacollectionModule.outputs.workspaceId
       endpointImmutableId: datacollectionModule.outputs.dcrImmutableId
