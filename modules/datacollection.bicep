@@ -2,8 +2,11 @@ param ruleName string
 param endpointName string
 param workspaceName string
 
-var workspaceResourceId = resourceId('Microsoft.OperationalInsights/workspaces', workspaceName)
-output workspaceResourceId string = workspaceResourceId
+resource law 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
+  name: workspaceName
+}
+
+output workspaceId string = law.id
 
 resource dataCollectionEndpoint 'Microsoft.Insights/dataCollectionEndpoints@2023-03-11' = {
   name: endpointName
@@ -250,7 +253,7 @@ resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' 
     destinations: {
       logAnalytics: [
         {
-          workspaceResourceId: workspaceResourceId
+          workspaceResourceId: workspace.id
           name: 'beyondTrustWorkspace'
         }
       ]

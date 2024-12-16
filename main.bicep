@@ -9,6 +9,7 @@ type functionAppConfig = {
   keyvaultName: string
 }
 
+param beyondTrustTenant string
 param datacollection dataCollectionConfig
 param functionConfig functionAppConfig
 
@@ -30,6 +31,7 @@ module functionappModule './modules/functionapp.bicep' = {
       workspaceName: datacollectionModule.outputs.workspaceResourceId
       endpointImmutableId: datacollectionModule.outputs.dcrImmutableId
       endpointUri: datacollectionModule.outputs.logsIngestionEndpoint
+      beyondTrustTenant: beyondTrustTenant
     }
   }
 }
@@ -51,6 +53,16 @@ module workspaceReaderRoleAssignment './modules/workspace-role-assignment.bicep'
   params: {
     roleAssignmentName: '${uniqueString(functionConfig.name)}-workspace-reader-role-assignment'
     roleDefinitionId: '73c42c96-874c-492b-b04d-ab87d138a893' // Log Analytics Reader
+    principalId: principalId
+    workspaceName: datacollection.workspaceName
+  }
+}
+
+module workspaceMetricPublisherRoleAssignment './modules/workspace-role-assignment.bicep' = {
+  name: 'workspaceMetricPublisherRoleAssignment'
+  params: {
+    roleAssignmentName: '${uniqueString(functionConfig.name)}-workspace-metric-publisher-role-assignment'
+    roleDefinitionId: '3913510d-42f4-4e42-8a64-420c390055eb' // Log Analytics Reader
     principalId: principalId
     workspaceName: datacollection.workspaceName
   }

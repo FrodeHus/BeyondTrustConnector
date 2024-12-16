@@ -2,6 +2,7 @@ type dataCollectionConfig = {
   endpointImmutableId: string
   endpointUri: string
   workspaceName: string
+  beyondTrustTenant: string
 }
 
 param dataCollection dataCollectionConfig
@@ -99,6 +100,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         {
           name: 'DCR_ENDPOINT'
           value: dataCollection.endpointUri
+        }
+        {
+          name: 'BEYONDTRUST_TENANT'
+          value: dataCollection.beyondTrustTenant
         }
       ]
       netFrameworkVersion: 'v9.0'  

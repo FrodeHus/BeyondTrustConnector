@@ -1,5 +1,5 @@
 using './main.bicep'
-
+param beyondTrustTenant = 'mytenant'
 param datacollection  = {
   ruleName: 'dcr-beyondtrust'
   endpointName: 'beyondtrust-endpoint'
