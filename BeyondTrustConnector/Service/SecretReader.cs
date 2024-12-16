@@ -9,7 +9,7 @@ namespace BeyondTrustConnector.Service
         public static async Task<string> GetSecretAsync(string secretName)
         {
             var keyvaultName = Environment.GetEnvironmentVariable("KEYVAULT_NAME") ?? throw new Exception("KEYVAULT_NAME environment variable is not set");
-
+            var principalId = Environment.GetEnvironmentVariable("PRINCIPAL_ID") ?? throw new Exception("PRINCIPAL_ID environment variable is not set");
             SecretClientOptions options = new()
             {
                 Retry =
@@ -20,7 +20,7 @@ namespace BeyondTrustConnector.Service
                             Mode = RetryMode.Exponential
                          }
             };
-            var client = new SecretClient(new Uri($"https://{keyvaultName}.vault.azure.net/"), new DefaultAzureCredential(includeInteractiveCredentials: true), options);
+            var client = new SecretClient(new Uri($"https://{keyvaultName}.vault.azure.net/"), new DefaultAzureCredential(new DefaultAzureCredentialOptions { ManagedIdentityClientId = principalId}), options);
             KeyVaultSecret secret = await client.GetSecretAsync(secretName);
             return secret.Value;
         }
