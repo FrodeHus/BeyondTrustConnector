@@ -22,11 +22,22 @@ param storageAccountType string = 'Standard_LRS'
 param location string = resourceGroup().location
 
 var functionAppName = appName
-var hostingPlanName = appName
 var applicationInsightsName = appName
 param storageAccountName string = '${uniqueString(resourceGroup().id)}azfunctions'
-var functionWorkerRuntime = 'dotnet-isolated'
-
+param container string = 'frodehus/beyondtrustconnector:v1'
+resource managedEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' = {
+  name: appName
+  location: location
+  properties:{
+    workloadProfiles:[
+        {
+            name: 'Consumption'
+            workloadProfileType: 'Consumption'
+        }
+    ]
+  }
+  
+}
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: storageAccountName
   location: location
@@ -40,54 +51,30 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   }
 }
 
-resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
-  name: hostingPlanName
-  location: location
-  sku: {
-    name: 'Y1'
-    tier: 'Dynamic'
-  }
-  properties: {}
-}
-
-resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
+resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
   name: functionAppName
   location: location
-  kind: 'functionapp'
+  kind: 'functionapp,linux,container,azurecontainerapps'
   identity: {
     type: 'SystemAssigned'
   }
   properties: {
-    serverFarmId: hostingPlan.id
+    managedEnvironmentId: managedEnvironment.id
     siteConfig: {
+        linuxFxVersion:'DOCKER|${container}'
+        use32BitWorkerProcess: false
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
           value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
         }
         {
-          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
-        }
-        {
-          name: 'WEBSITE_CONTENTSHARE'
-          value: toLower(functionAppName)
-        }
-        {
           name: 'FUNCTIONS_EXTENSION_VERSION'
           value: '~4'
         }
         {
-          name: 'WEBSITE_NODE_DEFAULT_VERSION'
-          value: '~14'
-        }
-        {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
           value: applicationInsights.properties.InstrumentationKey
-        }
-        {
-          name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: functionWorkerRuntime
         }
         {
           name: 'WORKSPACE_ID'
@@ -106,9 +93,12 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           value: dataCollection.beyondTrustTenant
         }
       ]
-      netFrameworkVersion: 'v9.0'  
       ftpsState: 'FtpsOnly'
       minTlsVersion: '1.2'
+    }
+    resourceConfig: {
+        cpu:1
+        memory:'2Gi'
     }
     httpsOnly: true
   }
@@ -121,16 +111,6 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   properties: {
     Application_Type: 'web'
     Request_Source: 'rest'
-  }
-}
-
-resource continuousIntegration 'Microsoft.Web/sites/sourcecontrols@2024-04-01' = {
-  parent: functionApp
-  name: 'web'
-  properties: {
-    branch: 'main'
-    isManualIntegration: true
-    repoUrl: 'https://github.com/FrodeHus/BeyondTrustConnector.git'
   }
 }
 
