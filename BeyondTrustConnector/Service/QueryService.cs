@@ -38,7 +38,8 @@ public class QueryService(ILogger<QueryService> logger, IHttpClientFactory httpC
 
     public async Task<LogsQueryResult?> QueryWorkspace(string query)
     {
-        var client = new LogsQueryClient(new DefaultAzureCredential());
+        var principalId = Environment.GetEnvironmentVariable("PRINCIPAL_ID") ?? throw new Exception("PRINCIPAL_ID environment variable is not set");
+        var client = new LogsQueryClient(new DefaultAzureCredential(new DefaultAzureCredentialOptions { ManagedIdentityClientId = principalId}));
         var workspaceId = Environment.GetEnvironmentVariable("WORKSPACE_ID");
         var response = await client.QueryWorkspaceAsync(workspaceId, query, new QueryTimeRange(TimeSpan.FromDays(1)));
         if (response.Value.Status != LogsQueryResultStatus.Success)

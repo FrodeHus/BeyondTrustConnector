@@ -29,8 +29,10 @@ public class IngestionService(ILogger<IngestionService> logger)
     {
         var dcrEndpoint = Environment.GetEnvironmentVariable("DCR_ENDPOINT") ?? throw new Exception("Variable not set: DCR_ENDPOINT");
         var dcrId = Environment.GetEnvironmentVariable("DCR_ID") ?? throw new Exception("Variable not set: DCR_ID");
+        var principalId = Environment.GetEnvironmentVariable("PRINCIPAL_ID") ?? throw new Exception("PRINCIPAL_ID environment variable is not set");
+
         var endpoint = new Uri(dcrEndpoint);
-        var creds = new DefaultAzureCredential();
+        var creds = new DefaultAzureCredential(new DefaultAzureCredentialOptions { ManagedIdentityClientId = principalId });
         var client = new LogsIngestionClient(endpoint, creds);
         var response = await client.UploadAsync(dcrId, $"Custom-{tableName}", items);
 

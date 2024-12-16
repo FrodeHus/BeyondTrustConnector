@@ -24,10 +24,10 @@ param location string = resourceGroup().location
 var functionAppName = appName
 var applicationInsightsName = appName
 param storageAccountName string = '${uniqueString(resourceGroup().id)}azfunctions'
-param container string = 'frodehus/beyondtrustconnector:v1'
+param container string = 'frodehus/beyondtrustconnector:v1.2'
 param keyvaultName string
 param userAssignedIdentityId string
-param principalId string
+param clientId string
 
 resource managedEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-preview' = {
   name: appName
@@ -105,7 +105,7 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
         }
         {
             name: 'PRINCIPAL_ID' 
-            value: principalId
+            value: clientId
         }
       ]
       ftpsState: 'FtpsOnly'
