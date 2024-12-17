@@ -21,6 +21,7 @@ This will deploy:
 - Data Collection Endpoint
 - Data Collection Rules
 - Custom tables for LAW
+- ASIM parsers
 - Azure Function App
   - Managed identity with role assignments to read keyvault secrets and query workspace
  
