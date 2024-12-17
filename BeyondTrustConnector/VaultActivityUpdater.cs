@@ -11,7 +11,7 @@ namespace BeyondTrustConnector
     public class VaultActivityUpdater(BeyondTrustService beyondTrustService, QueryService queryService, IngestionService ingestionService, ILogger<VaultActivityUpdater> logger)
     {
         [Function(nameof(VaultActivityUpdater))]
-        public async Task Run([TimerTrigger("0 */15 * * * *", RunOnStartup = true)] TimerInfo myTimer)
+        public async Task Run([TimerTrigger("0 */15 * * * *", RunOnStartup = false)] TimerInfo myTimer)
         {
             DateTime? lastEventTime = await GetLastUpdatedTime();
             lastEventTime ??= DateTime.Now.AddDays(-5);
