@@ -48,7 +48,11 @@ namespace BeyondTrustConnector
             {
                 lastEventTime = ((DateTimeOffset)result.Table.Rows[0][0]).UtcDateTime;
             }
-            logger.LogInformation("Last event time: {LastEventTime}", lastEventTime?.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
+            if (lastEventTime is null)
+                logger.LogWarning("No last updated timestamp found");
+            else
+                logger.LogInformation("Last event time: {LastEventTime}", lastEventTime?.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
+
             return lastEventTime;
         }
     }

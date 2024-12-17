@@ -2,6 +2,7 @@ using BeyondTrustConnector.Service;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("BeyondTrustConnector.Tests")]
@@ -19,6 +20,7 @@ builder.Services.AddHttpClient(nameof(BeyondTrustConnector), (provider,client)=>
 builder.Services.AddTransient<IngestionService>();
 builder.Services.AddTransient<BeyondTrustService>();
 builder.Services.AddApplicationInsightsTelemetryWorkerService();
+builder.Logging.AddApplicationInsights();
 builder.ConfigureFunctionsWebApplication();
 
 
