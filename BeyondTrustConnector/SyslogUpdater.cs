@@ -13,12 +13,7 @@ namespace BeyondTrustConnector
         [Function(nameof(SyslogUpdater))]
         public async Task Run([TimerTrigger("0 */15 * * * *", RunOnStartup = false)] TimerInfo myTimer)
         {
-            var result = await queryService.QueryWorkspace("BeyondTrustEvents_CL | summarize arg_max(TimeGenerated,*) | project TimeGenerated");
-            DateTime? lastEventTime = null;
-            if (result?.Table.Rows.Count == 1 && result?.Table.Rows[0][0] is not null)
-            {
-                lastEventTime = ((DateTimeOffset)result.Table.Rows[0][0]).UtcDateTime;
-            }
+            DateTime? lastEventTime = await GetLastUpdatedTime();
 
             var syslogArchiveData = await beyondTrustService.DownloadReportAsync("Syslog");
             ZipArchive archive = new(new MemoryStream(syslogArchiveData));
@@ -39,10 +34,22 @@ namespace BeyondTrustConnector
 
                 var filteredEvents = events.Where(e => e.AdditionalData.ContainsKey("who") && !e.AdditionalData["who"].StartsWith("Sentinel integration") && e.EventType != "syslog_report_generated");
                 logger.LogInformation("Found {EventCount} total events - filtered to {FilteredEventCount}", events.Count, filteredEvents.Count());
-                if(filteredEvents.Any())
+                if (filteredEvents.Any())
                     await ingestionService.IngestSyslog(filteredEvents.ToList());
             }
 
+        }
+
+        private async Task<DateTime?> GetLastUpdatedTime()
+        {
+            var result = await queryService.QueryWorkspace("BeyondTrustEvents_CL | summarize arg_max(TimeGenerated,*) | project TimeGenerated");
+            DateTime? lastEventTime = null;
+            if (result?.Table.Rows.Count == 1 && result?.Table.Rows[0][0] is not null)
+            {
+                lastEventTime = ((DateTimeOffset)result.Table.Rows[0][0]).UtcDateTime;
+            }
+            logger.LogInformation("Last event time: {LastEventTime}", lastEventTime?.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
+            return lastEventTime;
         }
     }
 }

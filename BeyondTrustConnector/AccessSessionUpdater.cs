@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Xml.Linq;
 using BeyondTrustConnector.Model;
 using BeyondTrustConnector.Service;
@@ -12,18 +13,11 @@ namespace BeyondTrustConnector
         [Function(nameof(AccessSessionUpdater))]
         public async Task Run([TimerTrigger("0 */15 * * * *", RunOnStartup = false)] TimerInfo myTimer)
         {
-            var result = await queryService.QueryWorkspace("BeyondTrustAccessSession_CL | summarize arg_max(TimeGenerated,*) | project TimeGenerated");
-            DateTime? lastSessionTime = null;
-            if (result?.Table.Rows.Count == 1 && result?.Table.Rows[0][0] is not null)
-            {
-                lastSessionTime = ((DateTimeOffset)result.Table.Rows[0][0]).UtcDateTime;
-            }
-            else
-            {
-                lastSessionTime = DateTime.Now.AddDays(-5);
-            }
+            DateTime? lastEventTime = await GetLastUpdatedTime();
+            lastEventTime ??= DateTime.Now.AddDays(-5);
+
             var ns = "http://www.beyondtrust.com/sra/namespaces/API/reporting";
-            var report = await beyondTrustService.GetAccessSessionReport(lastSessionTime.Value);
+            var report = await beyondTrustService.GetAccessSessionReport(lastEventTime.Value);
             var sessions = report.Root!.Descendants(XName.Get("session", ns));
 
             var accessSessions = new List<BeyondTrustAccessSession>();
@@ -90,6 +84,18 @@ namespace BeyondTrustConnector
                 users.Add(userDetails);
             }
             return users;
+        }
+
+        private async Task<DateTime?> GetLastUpdatedTime()
+        {
+            var result = await queryService.QueryWorkspace("BeyondTrustAccessSession_CL | summarize arg_max(TimeGenerated,*) | project TimeGenerated");
+            DateTime? lastEventTime = null;
+            if (result?.Table.Rows.Count == 1 && result?.Table.Rows[0][0] is not null)
+            {
+                lastEventTime = ((DateTimeOffset)result.Table.Rows[0][0]).UtcDateTime;
+            }
+            logger.LogInformation("Last event time: {LastEventTime}", lastEventTime?.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
+            return lastEventTime;
         }
     }
 }
