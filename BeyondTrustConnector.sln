@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deploy", "deploy", "{F48F5888-80FE-41FD-B8EE-965E758D2DB3}"
 	ProjectSection(SolutionItems) = preProject
 		modules\datacollection.bicep = modules\datacollection.bicep
+		modules\asimparsers.bicep = modules\asimparsers.bicep
 		modules\functionapp.bicep = modules\functionapp.bicep
 		main.bicep = main.bicep
 		main.bicepparam = main.bicepparam
