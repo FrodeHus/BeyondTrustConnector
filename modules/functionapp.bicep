@@ -33,6 +33,7 @@ resource managedEnvironment 'Microsoft.App/managedEnvironments@2024-10-02-previe
   name: appName
   location: location
   properties:{
+    publicNetworkAccess:'Disabled'    
     workloadProfiles:[
         {
             name: 'Consumption'
