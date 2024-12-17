@@ -49,11 +49,19 @@ namespace BeyondTrustConnector
                     JumpItemAddress = jumpItemValue,
                     JumpItemId = int.Parse(jumpItemId),
                     JumpGroup = jumpGroup,
-                    SessionType = sessionType,
-                    UserDetails = GetUserDetails(session, ns)
+                    SessionType = sessionType
                 };
 
-                accessSessions.Add(sessionData);
+                try
+                {
+                    var userDetails = GetUserDetails(session, ns);
+                    sessionData.UserDetails = userDetails;
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError("Error getting user details: {ErrorMessage}", ex.Message);
+                }
+                    accessSessions.Add(sessionData);
             }
 
             await ingestionService.IngestAccessSessions(accessSessions);
@@ -73,7 +81,7 @@ namespace BeyondTrustConnector
                     userDetails.Add("Username", userElement.Element(XName.Get("username", ns))!.Value);
                     userDetails.Add("PublicIP", userElement.Element(XName.Get("public_ip", ns))!.Value);
                     userDetails.Add("PrivateIP", userElement.Element(XName.Get("private_ip", ns))!.Value);
-                    userDetails.Add("Hostname", userElement.Element(XName.Get("hostname", ns))!.Value);
+                    userDetails.Add("Hostname", userElement.Element(XName.Get("hostname", ns))?.Value ?? "Unknown");
                     userDetails.Add("OS", userElement.Element(XName.Get("os", ns))!.Value);
                     var sessionOwnerData = userElement.Element(XName.Get("session_owner", ns))?.Value;
                     if (!string.IsNullOrEmpty(sessionOwnerData))
