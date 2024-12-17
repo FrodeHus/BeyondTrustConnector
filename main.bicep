@@ -66,4 +66,11 @@ module workspaceReaderRoleAssignment './modules/workspace-role-assignment.bicep'
     workspaceName: datacollection.workspaceName
   }
 }
+
+module asimParsers './modules/asimparsers.bicep' = {
+  name: 'asimParsers'
+  params: {
+    workspaceName: datacollection.workspaceName
+  }
+}
  
