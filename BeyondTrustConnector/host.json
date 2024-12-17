@@ -9,7 +9,8 @@
         "enableLiveMetricsFilters": true
       },
       "logLevel": {
-        "default": "Warning"
+        "default": "Information",
+        "Microsoft": "Warning"
       }
     }
 }
