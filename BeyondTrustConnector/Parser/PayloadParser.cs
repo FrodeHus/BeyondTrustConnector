@@ -27,6 +27,11 @@
 
         private string ParseValue()
         {
+            if(Current == ';')
+            {
+                _position++;
+                return "";
+            }
             var start = _position;
             do
             {

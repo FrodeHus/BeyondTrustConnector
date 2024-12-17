@@ -18,7 +18,8 @@ Dec 10 07:04:11 tenant BG[12482]: 1427:01:01:event=login;site=tenant.beyondtrust
         var parser = new BeyondTrustLogParser(log);
         var events = parser.Parse();
         Assert.Equal(2, events.Count);
-        Assert.Equal(97, events.First().AdditionalData.Count);
+        Assert.Equal(101, events.First().AdditionalData.Count);
+        Assert.Equal("", events.First().AdditionalData["old_account:comments"]);
     }
 
     [Fact]
