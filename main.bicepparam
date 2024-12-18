@@ -10,5 +10,5 @@ param functionConfig = {
   name: 'func-btconnect'
   keyvaultName: 'btvault'
   keyvaultSecretName: 'BeyondTrustAPI'
-  container: 'frodehus/beyondtrustconnector:v1.2'
+  container: 'frodehus/beyondtrustconnector:latest'
 }

@@ -56,7 +56,7 @@ module vaultSecretUserRoleAssignment './modules/vault-role-assignment.bicep' = {
     roleDefinitionId: '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secret User
     principalId: userAssignedIdentity.properties.principalId
     keyVaultName: functionConfig.keyvaultName    
-    secretName: functionConfig.keyvaultSecret
+    secretName: functionConfig.keyvaultSecretName
   }
 }
 
