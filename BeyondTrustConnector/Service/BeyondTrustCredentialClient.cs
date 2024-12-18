@@ -10,12 +10,9 @@ internal class BeyondTrustCredentialClient(IHttpClientFactory httpClientFactory,
 {
     public async Task<string> GetAccessToken(string beyondTrustTenantName)
     {
-        var secret = await SecretReader.GetSecretAsync("BeyondTrustApi");
-        var credential = JsonSerializer.Deserialize<BeyondTrustCredential>(secret);
-        if (credential is null)
-        {
-            throw new Exception("Failed to deserialize BeyondTrust credential");
-        }
+        var secretName = Environment.GetEnvironmentVariable("KEYVAULT_SECRET") ?? throw new Exception("KEYVAULT_SECRET environment variable is not set");
+        var secret = await SecretReader.GetSecretAsync(secretName);
+        var credential = JsonSerializer.Deserialize<BeyondTrustCredential>(secret) ?? throw new Exception("Failed to deserialize BeyondTrust credential");
         var client = httpClientFactory.CreateClient();
         var basicAuth = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{credential.ClientId}:{credential.ClientSecret}"));
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", basicAuth);

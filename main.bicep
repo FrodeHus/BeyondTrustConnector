@@ -7,6 +7,7 @@ type dataCollectionConfig = {
 type functionAppConfig = {
   name: string
   keyvaultName: string
+  keyvaultSecretName: string
   container: string
 }
 
@@ -35,6 +36,7 @@ module functionappModule './modules/functionapp.bicep' = {
     appName: '${functionConfig.name}-${uniqueString(resourceGroup().name)}'
     location: resourceGroup().location
     keyvaultName: functionConfig.keyvaultName
+    keyvaultSecretName: functionConfig.keyvaultSecretName
     userAssignedIdentityId: userAssignedIdentity.id
     clientId: userAssignedIdentity.properties.clientId
     container: functionConfig.container
@@ -53,7 +55,8 @@ module vaultSecretUserRoleAssignment './modules/vault-role-assignment.bicep' = {
     roleAssignmentName: '${uniqueString(functionConfig.name)}-keyvault-reader-role-assignment'
     roleDefinitionId: '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secret User
     principalId: userAssignedIdentity.properties.principalId
-    keyVaultName: functionConfig.keyvaultName
+    keyVaultName: functionConfig.keyvaultName    
+    secretName: functionConfig.keyvaultSecret
   }
 }
 

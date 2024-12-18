@@ -26,6 +26,7 @@ var applicationInsightsName = appName
 param storageAccountName string = '${uniqueString(resourceGroup().id)}azfunctions'
 param container string = 'frodehus/beyondtrustconnector:v1.2'
 param keyvaultName string
+param keyvaultSecretName string
 param userAssignedIdentityId string
 param clientId string
 
@@ -103,6 +104,10 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
         {
             name: 'KEYVAULT_NAME'
             value:keyvaultName
+        }
+        {
+            name: 'KEYVAULT_SECRET'
+            value: keyvaultSecretName
         }
         {
             name: 'PRINCIPAL_ID' 
