@@ -47,6 +47,13 @@ The deployment creates the following custom tables in Azure Log Analytics Worksp
 
 These custom tables provide valuable insights by enabling advanced querying and analytics within Azure Sentinel, helping to detect anomalies and potential security threats based on the data collected from BeyondTrust.
 
+### ASIM Parsers
+
+The following ASIM parsers are deployed:
+
+- **vimAuthenticationBeyondTrust**: Follows the `Authentication` schema to integrate with the `imAuthentication` unified parser to provide authentication events.
+- **vimAuditBeyondTrust**: Follows the `AuditEvent` schema to integrate with the `imAuditEvent` unified parser to provide audit events.
+
 ## What It Provides
 
 - Automated data collection from BeyondTrust API
