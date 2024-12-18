@@ -32,6 +32,7 @@ This deployment will create:
 - Data Collection Rules
 - Custom tables for Azure Log Analytics Workspace (LAW)
 - ASIM parsers
+- Workbook
 - Azure Function App
   - Managed identity with role assignments to read Key Vault secrets and query the workspace
 
@@ -53,6 +54,12 @@ The following ASIM parsers are deployed:
 
 - **vimAuthenticationBeyondTrust**: Follows the [Authentication](https://learn.microsoft.com/en-us/azure/sentinel/normalization-schema-authentication) schema to integrate with the `imAuthentication` unified parser to provide authentication events.
 - **vimAuditBeyondTrust**: Follows the [AuditEvent](https://learn.microsoft.com/en-us/azure/sentinel/normalization-schema-audit) schema to integrate with the `imAuditEvent` unified parser to provide audit events.
+
+### Workbooks
+
+The following workbooks are deployed:
+
+- **BeyondTrust SignIns**: Shows BeyondTrust usage, authentication events, jump item sessions and audit events.
 
 ## What It Provides
 
