@@ -76,4 +76,11 @@ module asimParsers './modules/asimparsers.bicep' = {
     workspaceName: datacollection.workspaceName
   }
 }
+
+module workbooks './modules/workbooks.bicep' = {
+    name: 'workbooks'
+    params: {
+        workspaceName: datacollection.workspaceName    
+    }
+}
  
