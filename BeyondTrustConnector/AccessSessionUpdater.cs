@@ -78,11 +78,11 @@ namespace BeyondTrustConnector
                 var userDetails = new Dictionary<string, object>();
                 if (userElement is not null)
                 {
-                    userDetails.Add("Username", userElement.Element(XName.Get("username", ns))!.Value);
-                    userDetails.Add("PublicIP", userElement.Element(XName.Get("public_ip", ns))!.Value);
-                    userDetails.Add("PrivateIP", userElement.Element(XName.Get("private_ip", ns))!.Value);
+                    userDetails.Add("Username", userElement.Element(XName.Get("username", ns))?.Value ?? "Unknown");
+                    userDetails.Add("PublicIP", userElement.Element(XName.Get("public_ip", ns))?.Value ?? "Unknown");
+                    userDetails.Add("PrivateIP", userElement.Element(XName.Get("private_ip", ns))?.Value ?? "Unknown");
                     userDetails.Add("Hostname", userElement.Element(XName.Get("hostname", ns))?.Value ?? "Unknown");
-                    userDetails.Add("OS", userElement.Element(XName.Get("os", ns))!.Value);
+                    userDetails.Add("OS", userElement.Element(XName.Get("os", ns))?.Value ?? "Unknown");
                     var sessionOwnerData = userElement.Element(XName.Get("session_owner", ns))?.Value;
                     if (!string.IsNullOrEmpty(sessionOwnerData))
                     {
