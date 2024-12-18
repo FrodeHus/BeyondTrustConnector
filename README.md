@@ -51,8 +51,8 @@ These custom tables provide valuable insights by enabling advanced querying and 
 
 The following ASIM parsers are deployed:
 
-- **vimAuthenticationBeyondTrust**: Follows the `Authentication` schema to integrate with the `imAuthentication` unified parser to provide authentication events.
-- **vimAuditBeyondTrust**: Follows the `AuditEvent` schema to integrate with the `imAuditEvent` unified parser to provide audit events.
+- **vimAuthenticationBeyondTrust**: Follows the [Authentication](https://learn.microsoft.com/en-us/azure/sentinel/normalization-schema-authentication) schema to integrate with the `imAuthentication` unified parser to provide authentication events.
+- **vimAuditBeyondTrust**: Follows the [AuditEvent](https://learn.microsoft.com/en-us/azure/sentinel/normalization-schema-audit) schema to integrate with the `imAuditEvent` unified parser to provide audit events.
 
 ## What It Provides
 
