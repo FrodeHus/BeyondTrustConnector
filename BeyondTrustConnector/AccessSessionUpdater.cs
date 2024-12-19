@@ -1,9 +1,7 @@
-using System;
 using System.Globalization;
 using System.Xml.Linq;
 using BeyondTrustConnector.Model;
 using BeyondTrustConnector.Service;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
@@ -22,15 +20,36 @@ public class AccessSessionUpdater(BeyondTrustService beyondTrustService, Ingesti
         var sessions = report.Root!.Descendants(XName.Get("session", ns));
         var existingSessions = await CheckIfSessionsAlreadyExists(queryService, sessions);
         var accessSessions = new List<BeyondTrustAccessSession>();
+
         foreach (var session in sessions)
         {
             if (session is null) continue;
+
             var sessionId = session.Attribute("lsid")!.Value;
             if (existingSessions.Contains(sessionId))
             {
                 logger.LogInformation("Session {SessionId} already exists in the workspace", sessionId);
                 continue;
             }
+
+            var sessionData = CreateSessionData(session, ns);
+            if (sessionData != null)
+            {
+                accessSessions.Add(sessionData);
+            }
+        }
+
+        if (accessSessions.Count != 0)
+        {
+            await ingestionService.IngestAccessSessions(accessSessions);
+        }
+    }
+
+    private BeyondTrustAccessSession? CreateSessionData(XElement session, string ns)
+    {
+        try
+        {
+            var sessionId = session.Attribute("lsid")!.Value;
             var startTime = DateTimeOffset.Parse(session.Element(XName.Get("start_time", ns))!.Value);
             DateTimeOffset? endTime = null;
             var endTimeValue = session.Element(XName.Get("end_time", ns));
@@ -45,6 +64,7 @@ public class AccessSessionUpdater(BeyondTrustService beyondTrustService, Ingesti
             var jumpItemId = jumpItem!.Attribute("gsnumber")!.Value;
             var jumpGroup = session.Element(XName.Get("jump_group", ns))!.Value;
             var sessionType = session.Element(XName.Get("session_type", ns))!.Value;
+
             var sessionData = new BeyondTrustAccessSession
             {
                 StartTime = startTime.UtcDateTime,
@@ -72,19 +92,14 @@ public class AccessSessionUpdater(BeyondTrustService beyondTrustService, Ingesti
                 sessionData.FileDeleteCount = fileDeleteCount;
             }
 
-            try
-            {
-                var userDetails = GetUserDetails(session, ns);
-                sessionData.UserDetails = userDetails;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError("Error getting user details: {ErrorMessage}", ex.Message);
-            }
-            accessSessions.Add(sessionData);
+            sessionData.UserDetails = GetUserDetails(session, ns);
+            return sessionData;
         }
-        if (accessSessions.Count != 0)
-            await ingestionService.IngestAccessSessions(accessSessions);
+        catch (Exception ex)
+        {
+            logger.LogError("Error creating session data: {ErrorMessage}", ex.Message);
+            return null;
+        }
     }
 
     private static async Task<List<string?>> CheckIfSessionsAlreadyExists(QueryService queryService, IEnumerable<XElement> sessions)
