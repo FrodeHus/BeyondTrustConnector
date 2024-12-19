@@ -45,7 +45,6 @@ public class AccessSessionUpdater(BeyondTrustService beyondTrustService, Ingesti
             var jumpItemId = jumpItem!.Attribute("gsnumber")!.Value;
             var jumpGroup = session.Element(XName.Get("jump_group", ns))!.Value;
             var sessionType = session.Element(XName.Get("session_type", ns))!.Value;
-
             var sessionData = new BeyondTrustAccessSession
             {
                 StartTime = startTime.UtcDateTime,
@@ -57,6 +56,21 @@ public class AccessSessionUpdater(BeyondTrustService beyondTrustService, Ingesti
                 JumpGroup = jumpGroup,
                 SessionType = sessionType
             };
+
+            if (int.TryParse(session.Element(XName.Get("file_transfer_count", ns))?.Value, out var fileTransferCount))
+            {
+                sessionData.FileTransferCount = fileTransferCount;
+            }
+
+            if (int.TryParse(session.Element(XName.Get("file_move_count", ns))?.Value, out var fileMoveCount))
+            {
+                sessionData.FileMoveCount = fileMoveCount;
+            }
+
+            if (int.TryParse(session.Element(XName.Get("file_move_count", ns))?.Value, out var fileDeleteCount))
+            {
+                sessionData.FileDeleteCount = fileDeleteCount;
+            }
 
             try
             {

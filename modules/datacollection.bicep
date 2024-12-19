@@ -144,6 +144,18 @@ resource Custom_Table_BeyondTrustAccessSession_CL 'Microsoft.OperationalInsights
           name: 'UserDetails'
           type: 'dynamic'
         }
+        {
+          name: 'FileTransferCount'
+          type: 'int'
+        }
+        {
+          name: 'FileMoveCount'
+          type: 'int'
+        }
+        {
+          name: 'FileDeleteCount'
+          type: 'int'
+        }
       ]
     }
     retentionInDays: 30
@@ -248,6 +260,18 @@ resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' 
           }
           {
             name: 'UserId'
+            type: 'int'
+          }
+          {
+            name: 'FileTransferCount'
+            type: 'int'
+          }
+          {
+            name: 'FileMoveCount'
+            type: 'int'
+          }
+          {
+            name: 'FileDeleteCount'
             type: 'int'
           }
         ]
