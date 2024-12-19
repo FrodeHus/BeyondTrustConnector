@@ -75,7 +75,7 @@ public class AccessSessionUpdater(BeyondTrustService beyondTrustService, Ingesti
 
     private static async Task<List<string?>> CheckIfSessionsAlreadyExists(QueryService queryService, IEnumerable<XElement> sessions)
     {
-        var sessionIds = sessions.Select(s => s.Attribute("lsid")!.Value).Aggregate(string.Empty, (current, next) => current += $"'{next}',").TrimEnd(',');
+        var sessionIds = sessions.Select(s => s.Attribute("lsid")!.Value).Distinct().Aggregate(string.Empty, (current, next) => current += $"'{next}',").TrimEnd(',');
         var existingSessionResult = await queryService.QueryWorkspace($"BeyondTrustAccessSession_CL | where SessionId in ({sessionIds}) | project SessionId");
         var existingSessions = existingSessionResult?.Table.Rows.Select(r => r[0].ToString()).ToList() ?? [];
         return existingSessions;
