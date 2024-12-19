@@ -11,4 +11,7 @@ public class BeyondTrustAccessSession
     public required string JumpItemAddress { get; set; }
     public int JumpItemId { get; set; }
     public IEnumerable<Dictionary<string, object>> UserDetails { get; set; } = [];
+    public int? FileTransferCount { get; set; }
+    public int? FileMoveCount { get; set; }
+    public int? FileDeleteCount { get; set; }
 }

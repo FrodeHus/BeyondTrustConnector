@@ -1,9 +1,7 @@
-using System;
 using System.Globalization;
 using System.Xml.Linq;
 using BeyondTrustConnector.Model;
 using BeyondTrustConnector.Service;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
@@ -22,15 +20,36 @@ public class AccessSessionUpdater(BeyondTrustService beyondTrustService, Ingesti
         var sessions = report.Root!.Descendants(XName.Get("session", ns));
         var existingSessions = await CheckIfSessionsAlreadyExists(queryService, sessions);
         var accessSessions = new List<BeyondTrustAccessSession>();
+
         foreach (var session in sessions)
         {
             if (session is null) continue;
+
             var sessionId = session.Attribute("lsid")!.Value;
             if (existingSessions.Contains(sessionId))
             {
                 logger.LogInformation("Session {SessionId} already exists in the workspace", sessionId);
                 continue;
             }
+
+            var sessionData = CreateSessionData(session, ns);
+            if (sessionData != null)
+            {
+                accessSessions.Add(sessionData);
+            }
+        }
+
+        if (accessSessions.Count != 0)
+        {
+            await ingestionService.IngestAccessSessions(accessSessions);
+        }
+    }
+
+    private BeyondTrustAccessSession? CreateSessionData(XElement session, string ns)
+    {
+        try
+        {
+            var sessionId = session.Attribute("lsid")!.Value;
             var startTime = DateTimeOffset.Parse(session.Element(XName.Get("start_time", ns))!.Value);
             DateTimeOffset? endTime = null;
             var endTimeValue = session.Element(XName.Get("end_time", ns));
@@ -58,27 +77,50 @@ public class AccessSessionUpdater(BeyondTrustService beyondTrustService, Ingesti
                 SessionType = sessionType
             };
 
-            try
+            if (int.TryParse(session.Element(XName.Get("file_transfer_count", ns))?.Value, out var fileTransferCount))
             {
-                var userDetails = GetUserDetails(session, ns);
-                sessionData.UserDetails = userDetails;
+                sessionData.FileTransferCount = fileTransferCount;
             }
-            catch (Exception ex)
+
+            if (int.TryParse(session.Element(XName.Get("file_move_count", ns))?.Value, out var fileMoveCount))
             {
-                logger.LogError("Error getting user details: {ErrorMessage}", ex.Message);
+                sessionData.FileMoveCount = fileMoveCount;
             }
-            accessSessions.Add(sessionData);
+
+            if (int.TryParse(session.Element(XName.Get("file_move_count", ns))?.Value, out var fileDeleteCount))
+            {
+                sessionData.FileDeleteCount = fileDeleteCount;
+            }
+
+            sessionData.UserDetails = GetUserDetails(session, ns);
+            return sessionData;
         }
-        if (accessSessions.Count != 0)
-            await ingestionService.IngestAccessSessions(accessSessions);
+        catch (Exception ex)
+        {
+            logger.LogError("Error creating session data: {ErrorMessage}", ex.Message);
+            return null;
+        }
     }
 
     private static async Task<List<string?>> CheckIfSessionsAlreadyExists(QueryService queryService, IEnumerable<XElement> sessions)
     {
-        var sessionIds = sessions.Select(s => s.Attribute("lsid")!.Value).Distinct().Aggregate(string.Empty, (current, next) => current += $"'{next}',").TrimEnd(',');
-        var existingSessionResult = await queryService.QueryWorkspace($"BeyondTrustAccessSession_CL | where SessionId in ({sessionIds}) | project SessionId");
-        var existingSessions = existingSessionResult?.Table.Rows.Select(r => r[0].ToString()).ToList() ?? [];
-        return existingSessions;
+        var sessionIds = sessions.Select(s => s.Attribute("lsid")!.Value).Distinct().ToList();
+        var existingSessions = new List<string?>();
+
+        const int batchSize = 20;
+        for (int i = 0; i < sessionIds.Count; i += batchSize)
+        {
+            var batch = sessionIds.Skip(i).Take(batchSize);
+            var batchIds = string.Join(",", batch.Select(id => $"'{id}'"));
+            var query = $"BeyondTrustAccessSession_CL | where SessionId in ({batchIds}) | project SessionId";
+            var existingSessionResult = await queryService.QueryWorkspace(query);
+            if (existingSessionResult?.Table.Rows is not null)
+            {
+                existingSessions.AddRange(existingSessionResult.Table.Rows.Select(r => r[0].ToString()));
+            }
+        }
+
+        return existingSessions.Distinct().ToList();
     }
 
     private static List<Dictionary<string, object>> GetUserDetails(XElement session, string ns)
