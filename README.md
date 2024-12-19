@@ -18,6 +18,7 @@ Requires:
 Pre-requisites:
 - Existing Log Analytics Workspace
 - Key Vault with BeyondTrust API credentials secret
+   - Secret must be in the following format: `{ "ClientID": "<client id>", "ClientSecret": "<secret>" }`
 
 1. Update `main.bicepparam` to match your environment.
 2. Run the following command to deploy the resources:
