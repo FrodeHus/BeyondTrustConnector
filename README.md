@@ -11,7 +11,11 @@ Uses function app to pull reports from BeyondTrust API and push to a Azure Log A
 
 Requires:
 - BeyondTrust API enabled
-- BeyondTrust API credentials
+- BeyondTrust API credentials with permissions:
+   - Reporting API: Access Sessions
+   - Reporting API: License Usage
+   - Reporting API: Vault Reports
+   - Reporting API: Syslog
 
 ## Install
 
