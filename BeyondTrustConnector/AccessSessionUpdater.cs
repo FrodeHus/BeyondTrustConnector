@@ -20,9 +20,7 @@ public class AccessSessionUpdater(BeyondTrustService beyondTrustService, Ingesti
         var ns = "http://www.beyondtrust.com/sra/namespaces/API/reporting";
         var report = await beyondTrustService.GetAccessSessionReport(lastEventTime.Value);
         var sessions = report.Root!.Descendants(XName.Get("session", ns));
-        var sessionIds = sessions.Select(s => s.Attribute("lsid")!.Value).Aggregate(string.Empty, (current, next) => current += $"'{next}',").TrimEnd(',');
-        var existingSessionResult = await queryService.QueryWorkspace($"BeyondTrustAccessSession_CL | where SessionId in ({sessionIds}) | project SessionId");
-        var existingSessions = existingSessionResult?.Table.Rows.Select(r => r[0].ToString()).ToList() ?? [];
+        var existingSessions = await CheckIfSessionsAlreadyExists(queryService, sessions);
         var accessSessions = new List<BeyondTrustAccessSession>();
         foreach (var session in sessions)
         {
@@ -69,10 +67,18 @@ public class AccessSessionUpdater(BeyondTrustService beyondTrustService, Ingesti
             {
                 logger.LogError("Error getting user details: {ErrorMessage}", ex.Message);
             }
-                accessSessions.Add(sessionData);
+            accessSessions.Add(sessionData);
         }
         if (accessSessions.Count != 0)
             await ingestionService.IngestAccessSessions(accessSessions);
+    }
+
+    private static async Task<List<string?>> CheckIfSessionsAlreadyExists(QueryService queryService, IEnumerable<XElement> sessions)
+    {
+        var sessionIds = sessions.Select(s => s.Attribute("lsid")!.Value).Aggregate(string.Empty, (current, next) => current += $"'{next}',").TrimEnd(',');
+        var existingSessionResult = await queryService.QueryWorkspace($"BeyondTrustAccessSession_CL | where SessionId in ({sessionIds}) | project SessionId");
+        var existingSessions = existingSessionResult?.Table.Rows.Select(r => r[0].ToString()).ToList() ?? [];
+        return existingSessions;
     }
 
     private static List<Dictionary<string, object>> GetUserDetails(XElement session, string ns)
