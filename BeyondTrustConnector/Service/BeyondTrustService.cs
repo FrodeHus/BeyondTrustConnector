@@ -10,7 +10,7 @@ namespace BeyondTrustConnector.Service
         public async Task<XDocument> GetAccessSessionReport(DateTime start, int reportPeriod = 0)
         {
             var client = httpClientFactory.CreateClient(nameof(BeyondTrustConnector));
-            var unixTime = ((DateTimeOffset)start).ToUnixTimeSeconds() + 1;
+            var unixTime = ((DateTimeOffset)start).ToUnixTimeSeconds();
             string requestUri = $"/api/reporting?generate_report=AccessSession&start_date={start:yyyy-MM-dd}&duration={reportPeriod}&start_time={unixTime}";
             var response = await client.GetAsync(requestUri);
             if (!response.IsSuccessStatusCode)
