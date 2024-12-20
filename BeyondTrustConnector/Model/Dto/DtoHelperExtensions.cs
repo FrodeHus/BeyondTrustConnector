@@ -52,8 +52,7 @@
                         { "Destination", sessionDetails.destination?.Value ?? "Unknown" },
                         { "Details", sessionDetails.data?.Select(detail => new Dictionary<string, object>
                             {
-                                { "Key", detail.value.name },
-                                { "Value", detail.value.value }
+                                { detail.value.name, detail.value.value }
                             }
                         ).ToList() ?? []}
                     }
