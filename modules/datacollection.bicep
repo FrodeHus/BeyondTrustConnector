@@ -232,7 +232,7 @@ resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' 
             type: 'datetime'
           }
           {
-            name: 'Name'
+            name: 'JumpItemName'
             type: 'string'
           }
           {
@@ -399,7 +399,7 @@ resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' 
         destinations: [
           'beyondTrustWorkspace'
         ]
-        transformKql: 'source\n| extend TimeGenerated=now()\n'
+        transformKql: 'source\n| extend TimeGenerated=now()\n|project-rename Name=JumpItemName\n'
         outputStream: 'Custom-BeyondTrustLicenseUsage_CL'
       }
       {
