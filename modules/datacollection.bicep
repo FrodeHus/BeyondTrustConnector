@@ -137,11 +137,19 @@ resource Custom_Table_BeyondTrustAccessSession_CL 'Microsoft.OperationalInsights
           type: 'string'
         }
         {
+          name: 'JumpGroupId'
+          type: 'int'
+        }
+        {
           name: 'Jumpoint'
           type: 'string'
         }
         {
           name: 'UserDetails'
+          type: 'dynamic'
+        }
+        {
+          name: 'Events'
           type: 'dynamic'
         }
         {
@@ -155,6 +163,14 @@ resource Custom_Table_BeyondTrustAccessSession_CL 'Microsoft.OperationalInsights
         {
           name: 'FileDeleteCount'
           type: 'int'
+        }
+        {
+          name: 'ChatDownloadUrl'
+          type: 'string'
+        }
+        {
+          name: 'ChatViewUrl'
+          type: 'string'
         }
       ]
     }
@@ -227,12 +243,28 @@ resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' 
             type: 'string'
           }
           {
+            name: 'JumpGroupId'
+            type: 'int'
+          }
+          {
             name: 'Jumpoint'
             type: 'string'
           }
           {
             name: 'UserDetails'
             type: 'dynamic'
+          }
+          {
+            name: 'Events'
+            type: 'dynamic'
+          }
+          {
+            name: 'ChatDownloadUrl'
+            type: 'string'
+          }
+          {
+            name: 'ChatViewUrl'
+            type: 'string'
           }
         ]
       }
