@@ -19,6 +19,11 @@ public class IngestionService(ILogger<IngestionService> logger)
         await Ingest("BeyondTrustAccessSession_CL", sessions);
     }
 
+    internal async Task IngestLicenseUsage(List<BeyondTrustLicenseEntryDto> licenseEntries)
+    {
+        await Ingest("BeyondTrustLicenseUsage_CL", licenseEntries);
+    }
+
     internal async Task IngestVaultActivity(List<BeyondTrustVaultActivityDto> vaultActivities)
     {
         await Ingest("BeyondTrustVaultActivity_CL", vaultActivities);

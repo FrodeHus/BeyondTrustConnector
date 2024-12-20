@@ -1,4 +1,5 @@
 ﻿using BeyondTrustConnector.Model;
+using BeyondTrustConnector.Model.Dto;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
 using System.Xml;
@@ -9,7 +10,7 @@ namespace BeyondTrustConnector.Service
 {
     public class BeyondTrustService(IHttpClientFactory httpClientFactory, ILogger<BeyondTrustService> logger)
     {
-        public async Task<session_list> GetAccessSessionReport(DateTime start, int reportPeriod = 0)
+        internal async Task<session_list> GetAccessSessionReport(DateTime start, int reportPeriod = 0)
         {
             var client = httpClientFactory.CreateClient(nameof(BeyondTrustConnector));
             var unixTime = ((DateTimeOffset)start).ToUnixTimeSeconds();
@@ -31,7 +32,7 @@ namespace BeyondTrustConnector.Service
             return sessionList ?? throw new Exception("Failed to deserialize report");
         }
 
-        public async Task<XDocument> GetVaultActivityReport(DateTime start, int reportPeriod = 0)
+        internal async Task<XDocument> GetVaultActivityReport(DateTime start, int reportPeriod = 0)
         {
             var client = httpClientFactory.CreateClient(nameof(BeyondTrustConnector));
             var unixTime = ((DateTimeOffset)start).ToUnixTimeSeconds() + 1;
@@ -48,7 +49,7 @@ namespace BeyondTrustConnector.Service
             return XDocument.Parse(reportContent);
         }
 
-        public async Task<byte[]> DownloadReportAsync(string report)
+        internal async Task<byte[]> DownloadReportAsync(string report)
         {
             var client = httpClientFactory.CreateClient(nameof(BeyondTrustConnector));
             var response = await client.GetAsync($"/api/reporting?generate_report={report}");
@@ -60,6 +61,21 @@ namespace BeyondTrustConnector.Service
             }
             var reportData = await response.Content.ReadAsByteArrayAsync();
             return reportData;
+        }
+
+        internal async Task<byte[]> GetEndpointLicenseUsageReportAsync()
+        {
+            var client = httpClientFactory.CreateClient(nameof(BeyondTrustConnector));
+            var response = await client.GetAsync("/api/reporting?generate_report=EndpointLicenseUsage");
+            if (!response.IsSuccessStatusCode)
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                logger.LogError("Failed to get license usage: {ErrorMessage}", message);
+                throw new Exception("Failed to get license usage");
+            }
+            var reportArchive = await response.Content.ReadAsByteArrayAsync();
+
+            return reportArchive;
         }
 
         private async Task<TEntity> GetItem<TEntity>(string endpoint, string query)
