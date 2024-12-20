@@ -19,7 +19,48 @@ resource dataCollectionEndpoint 'Microsoft.Insights/dataCollectionEndpoints@2023
   }
 }
 
-
+resource Custom_Table_BeyondTrustLicenseUsage_CL 'Microsoft.OperationalInsights/workspaces/tables@2022-10-01' = {
+  parent: law
+  name: 'BeyondTrustVaultLicenseUsage_CL'
+  properties: {
+    totalRetentionInDays: 30
+    plan: 'Analytics'
+    schema: {
+      name: 'BeyondTrustVaultLicenseUsage_CL'
+      columns: [
+          {
+            name: 'TimeGenerated'
+            type: 'datetime'
+          }
+          {
+            name: 'Name'
+            type: 'string'
+          }
+          {
+            name: 'HostnameOrIp'
+            type: 'string'
+          }
+          {
+            name: 'Jumpoint'
+            type: 'string'
+          }
+          {
+            name: 'License'
+            type: 'boolean'
+          }
+          {
+            name: 'JumpMethod'
+            type: 'string'
+          }
+          {
+            name: 'JumpGroup'
+            type: 'string'
+          }
+      ]
+    }
+    retentionInDays: 30
+  }
+}
 
 resource Custom_Table_BeyondTrustVaultActivity_CL 'Microsoft.OperationalInsights/workspaces/tables@2022-10-01' = {
   parent: law
@@ -184,6 +225,38 @@ resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' 
   properties: {
     dataCollectionEndpointId: dataCollectionEndpoint.id
     streamDeclarations: {
+        'Custom-BeyondTrustLicenseUsage_CL': {
+        columns: [
+          {
+            name: 'TimeGenerated'
+            type: 'datetime'
+          }
+          {
+            name: 'Name'
+            type: 'string'
+          }
+          {
+            name: 'HostnameOrIp'
+            type: 'string'
+          }
+          {
+            name: 'Jumpoint'
+            type: 'string'
+          }
+          {
+            name: 'License'
+            type: 'boolean'
+          }
+          {
+            name: 'JumpMethod'
+            type: 'string'
+          }
+          {
+            name: 'JumpGroup'
+            type: 'string'
+          }
+        ]
+      }
       'Custom-BeyondTrustEvents_CL': {
         columns: [
           {
@@ -319,6 +392,16 @@ resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' 
       ]
     }
     dataFlows: [
+        {
+        streams: [
+          'Custom-BeyondTrustLicenseUsage_CL'
+        ]
+        destinations: [
+          'beyondTrustWorkspace'
+        ]
+        transformKql: 'source\n| extend TimeGenerated=now()\n'
+        outputStream: 'Custom-BeyondTrustLicenseUsage_CL'
+      }
       {
         streams: [
           'Custom-BeyondTrustEvents_CL'
