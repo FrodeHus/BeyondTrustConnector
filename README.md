@@ -51,6 +51,8 @@ The deployment creates the following custom tables in Azure Log Analytics Worksp
 
 - **BeyondTrustVaultActivity_CL**: Holds information about password vault actvitity such as create/update/usage of passwords.
 
+- **BeyondTrustLicenseUsage_CL**: Holds information about jump item license usage.
+
 These custom tables provide valuable insights by enabling advanced querying and analytics within Azure Sentinel, helping to detect anomalies and potential security threats based on the data collected from BeyondTrust.
 
 ### ASIM Parsers
