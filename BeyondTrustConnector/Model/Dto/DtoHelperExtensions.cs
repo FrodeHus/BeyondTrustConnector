@@ -44,20 +44,34 @@
                         { "SecondsInvolved", userDetails.seconds_involved }
                     }
                 ).ToList(),
-                Events = session.session_details.Select(sessionDetails => new Dictionary<string, object>
+                Events = session.session_details.Select(sessionDetails => GetSessionDetails(sessionDetails)
+                ).ToList()
+            };
+        }
+
+        private static Dictionary<string, object> GetSessionDetails(session_listSessionEvent sessionDetails)
+        {
+            var details = new Dictionary<string, object>
                     {
                         { "Event", sessionDetails.event_type },
                         { "When", sessionDetails.timestamp },
-                        { "Who", sessionDetails.performed_by?.Value ?? "Unknown" },
-                        { "Destination", sessionDetails.destination?.Value ?? "Unknown" },
                         { "Details", sessionDetails.data?.Select(detail => new Dictionary<string, object>
                             {
                                 { detail.value.name, detail.value.value }
                             }
                         ).ToList() ?? []}
-                    }
-                ).ToList()
-            };
+                    };
+            if (sessionDetails.performed_by is not null)
+            {
+                details.Add("PerformedBy", sessionDetails.performed_by.Value);
+            }
+
+            if (sessionDetails.destination is not null)
+            {
+                details.Add("Destination", sessionDetails.destination.Value);
+            }
+
+            return details;
         }
     }
 }
