@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 using System.Xml.Linq;
-using BeyondTrustConnector.Model;
+using BeyondTrustConnector.Model.Dto;
 using BeyondTrustConnector.Service;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
@@ -21,7 +21,7 @@ namespace BeyondTrustConnector
             var activities = report.Root!.Descendants(XName.Get("vault_account_activity", ns));
             var sessionBasedActivities = new string[] { "Credentials Used" };
 
-            var vaultActivities = new List<BeyondTrustVaultActivity>();
+            var vaultActivities = new List<BeyondTrustVaultActivityDto>();
             foreach (var activity in activities)
             {
                 var timestamp = int.Parse(activity.Attribute("timestamp")!.Value);
@@ -35,7 +35,7 @@ namespace BeyondTrustConnector
                 var performedBy = activity.Element(XName.Get("performed_by", ns));
                 int.TryParse(performedBy?.Attribute("id")?.Value, out var userId);
                 var userName = performedBy?.Value;
-                var vaultActivity = new BeyondTrustVaultActivity
+                var vaultActivity = new BeyondTrustVaultActivityDto
                 {
                     EventType = eventType,
                     Timestamp = UnixTimeStampToDateTimeUTC(timestamp),

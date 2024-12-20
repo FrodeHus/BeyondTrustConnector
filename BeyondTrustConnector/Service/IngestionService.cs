@@ -1,7 +1,6 @@
 ﻿using Azure.Identity;
 using Azure.Monitor.Ingestion;
-using BeyondTrustConnector.Model;
-using BeyondTrustConnector.Parser;
+using BeyondTrustConnector.Model.Dto;
 using Microsoft.Extensions.Logging;
 
 namespace BeyondTrustConnector.Service;
@@ -10,17 +9,17 @@ public class IngestionService(ILogger<IngestionService> logger)
 {
     private readonly ILogger<IngestionService> _logger = logger;
 
-    public async Task IngestSyslog(List<BeyondTrustLogEntry> events)
+    public async Task IngestSyslog(List<BeyondTrustLogEntryDto> events)
     {
         await Ingest("BeyondTrustEvents_CL", events);
     }
 
-    internal async Task IngestAccessSessions(List<BeyondTrustAccessSession> sessions)
+    internal async Task IngestAccessSessions(List<BeyondTrustAccessSessionDto> sessions)
     {
         await Ingest("BeyondTrustAccessSession_CL", sessions);
     }
 
-    internal async Task IngestVaultActivity(List<BeyondTrustVaultActivity> vaultActivities)
+    internal async Task IngestVaultActivity(List<BeyondTrustVaultActivityDto> vaultActivities)
     {
         await Ingest("BeyondTrustVaultActivity_CL", vaultActivities);
     }

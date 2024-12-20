@@ -1,13 +1,15 @@
 ﻿using BeyondTrustConnector.Model;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
+using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Serialization;
 
 namespace BeyondTrustConnector.Service
 {
     public class BeyondTrustService(IHttpClientFactory httpClientFactory, ILogger<BeyondTrustService> logger)
     {
-        public async Task<XDocument> GetAccessSessionReport(DateTime start, int reportPeriod = 0)
+        public async Task<session_list> GetAccessSessionReport(DateTime start, int reportPeriod = 0)
         {
             var client = httpClientFactory.CreateClient(nameof(BeyondTrustConnector));
             var unixTime = ((DateTimeOffset)start).ToUnixTimeSeconds();
@@ -20,8 +22,13 @@ namespace BeyondTrustConnector.Service
                 throw new Exception("Failed to generate report");
             }
             var reportContent = await response.Content.ReadAsStringAsync();
-            
-            return XDocument.Parse(reportContent);
+            if (string.IsNullOrEmpty(reportContent))
+            {
+                throw new Exception("Failed to generate report");
+            }
+            var serializer = new XmlSerializer(typeof(session_list));
+            var sessionList = serializer.Deserialize(new StringReader(reportContent)) as session_list;
+            return sessionList ?? throw new Exception("Failed to deserialize report");
         }
 
         public async Task<XDocument> GetVaultActivityReport(DateTime start, int reportPeriod = 0)
