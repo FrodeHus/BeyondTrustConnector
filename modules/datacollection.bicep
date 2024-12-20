@@ -21,12 +21,12 @@ resource dataCollectionEndpoint 'Microsoft.Insights/dataCollectionEndpoints@2023
 
 resource Custom_Table_BeyondTrustLicenseUsage_CL 'Microsoft.OperationalInsights/workspaces/tables@2022-10-01' = {
   parent: law
-  name: 'BeyondTrustVaultLicenseUsage_CL'
+  name: 'BeyondTrustLicenseUsage_CL'
   properties: {
     totalRetentionInDays: 30
     plan: 'Analytics'
     schema: {
-      name: 'BeyondTrustVaultLicenseUsage_CL'
+      name: 'BeyondTrustLicenseUsage_CL'
       columns: [
           {
             name: 'TimeGenerated'
