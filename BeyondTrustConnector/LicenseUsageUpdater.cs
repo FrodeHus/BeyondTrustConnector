@@ -10,7 +10,7 @@ namespace BeyondTrustConnector
     public class LicenseUsageUpdater(BeyondTrustService beyondTrustService, IngestionService ingestionService, ILogger<LicenseUsageUpdater> logger)
     {
         [Function(nameof(LicenseUsageUpdater))]
-        public async Task Run([TimerTrigger("0 0 8 * * *", RunOnStartup = true)] TimerInfo myTimer)
+        public async Task Run([TimerTrigger("0 0 8 * * *", RunOnStartup = false)] TimerInfo myTimer)
         {
             var reportArchive = await beyondTrustService.GetEndpointLicenseUsageReportAsync();
             ZipArchive archive = new(new MemoryStream(reportArchive));
