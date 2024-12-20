@@ -1,6 +1,6 @@
-﻿namespace BeyondTrustConnector.Parser;
+﻿namespace BeyondTrustConnector.Model.Dto;
 
-public class BeyondTrustLogEntry
+public class BeyondTrustLogEntryDto
 {
     public DateTime Timestamp { get; set; }
     public int CorrelationId { get; set; }

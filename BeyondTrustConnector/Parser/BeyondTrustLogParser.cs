@@ -1,16 +1,18 @@
 ﻿
+using BeyondTrustConnector.Model.Dto;
+
 namespace BeyondTrustConnector.Parser;
 
 internal class BeyondTrustLogParser(string log)
 {
-    public List<BeyondTrustLogEntry> Parse()
+    public List<BeyondTrustLogEntryDto> Parse()
     {
-        var entries = new List<BeyondTrustLogEntry>();
+        var entries = new List<BeyondTrustLogEntryDto>();
         var parser = new SyslogParser(log);
         foreach(var entry in parser.Entries)
         {
             var details = ParsePayload(entry.Payload);
-            var beyondTrustLogEntry = new BeyondTrustLogEntry
+            var beyondTrustLogEntry = new BeyondTrustLogEntryDto
             {
                 Timestamp = UnixTimeStampToDateTimeUTC(int.Parse(details["when"])),
                 CorrelationId = entry.CorrelationId,
