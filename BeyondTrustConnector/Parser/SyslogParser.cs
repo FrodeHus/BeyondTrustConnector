@@ -6,7 +6,7 @@ namespace BeyondTrustConnector.Parser;
 
 internal partial class SyslogParser
 {
-    [GeneratedRegex(@"(?<month>[A-Za-z]{3})\s(?<timestamp>\d{2}\s\d{2}:\d{2}:\d{2})\s(?<hostname>[a-z]+)\sBG\[(?<correlationId>\d{1,7})\]:\s(?<siteId>\d{1,5}):(?<segmentNumber>\d{2}):(?<segmentCount>\d{2}):(?<payload>.+)", RegexOptions.Compiled)]
+    [GeneratedRegex(@"(?<month>[A-Za-z]{3})\s{1,2}(?<timestamp>\d{1,2}\s\d{2}:\d{2}:\d{2})\s(?<hostname>[a-z]+)\sBG\[(?<correlationId>\d{1,7})\]:\s(?<siteId>\d{1,5}):(?<segmentNumber>\d{2}):(?<segmentCount>\d{2}):(?<payload>.+)", RegexOptions.Compiled)]
     private static partial Regex SyslogRegex();
     internal List<SyslogEntry> Entries { get; } = [];
     internal SyslogParser(string log)
@@ -63,7 +63,6 @@ internal partial class SyslogParser
 
         entry = new SyslogEntry
         {
-            Timestamp = DateTime.ParseExact($"{month} {timestamp}", "MMM dd HH:mm:ss", CultureInfo.InvariantCulture),
             Hostname = hostname,
             CorrelationId = correlationId,
             SiteId = siteId,
@@ -76,7 +75,6 @@ internal partial class SyslogParser
 
     internal class SyslogEntry
     {
-        public DateTime Timestamp { get; set; }
         public required string Hostname { get; set; }
         public int CorrelationId { get; set; }
         public int SiteId { get; set; }
