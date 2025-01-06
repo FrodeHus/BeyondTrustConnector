@@ -11,7 +11,7 @@ type functionAppConfig = {
   container: string
 }
 
-param beyondTrustTenant string
+param beyondTrustApplianceUrl string
 param datacollection dataCollectionConfig
 param functionConfig functionAppConfig
 
@@ -44,7 +44,7 @@ module functionappModule './modules/functionapp.bicep' = {
       workspaceName: datacollectionModule.outputs.workspaceId
       endpointImmutableId: datacollectionModule.outputs.dcrImmutableId
       endpointUri: datacollectionModule.outputs.logsIngestionEndpoint
-      beyondTrustTenant: beyondTrustTenant
+      beyondTrustApplianceUrl: beyondTrustApplianceUrl
     }
   }
 }

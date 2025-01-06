@@ -1,7 +1,7 @@
 using './main.bicep'
 
 // Specify your BeyondTrust tenant name
-param beyondTrustTenant = 'mytenant'
+param beyondTrustApplianceUrl = 'https://mytenant.beyondtrustcloud.com'
 
 // Data collection configuration
 param datacollection = {

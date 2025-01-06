@@ -2,7 +2,7 @@ type dataCollectionConfig = {
   endpointImmutableId: string
   endpointUri: string
   workspaceName: string
-  beyondTrustTenant: string
+  beyondTrustApplianceUrl: string
 }
 
 param dataCollection dataCollectionConfig
@@ -98,8 +98,8 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
           value: dataCollection.endpointUri
         }
         {
-          name: 'BEYONDTRUST_TENANT'
-          value: dataCollection.beyondTrustTenant
+          name: 'BEYONDTRUST_URL'
+          value: dataCollection.beyondTrustApplianceUrl
         }
         {
             name: 'KEYVAULT_NAME'

@@ -12,9 +12,9 @@ builder.Services.AddTransient<QueryService>();
 builder.Services.AddHttpClient(nameof(BeyondTrustConnector), (provider,client)=>
 {
     var beyondTrustCredentialClient = provider.GetRequiredService<BeyondTrustCredentialClient>();
-    var beyondTrustTenantName = Environment.GetEnvironmentVariable("BEYONDTRUST_TENANT") ?? throw new Exception("BEYONDTRUST_TENANT environment variable is not set");
-    client.BaseAddress = new Uri($"https://{beyondTrustTenantName}.beyondtrustcloud.com");
-    var token = beyondTrustCredentialClient.GetAccessToken(beyondTrustTenantName).Result;
+    var beyondTrustUrl = Environment.GetEnvironmentVariable("BEYONDTRUST_URL") ?? throw new Exception("BEYONDTRUST_URL environment variable is not set");
+    client.BaseAddress = new Uri(beyondTrustUrl);
+    var token = beyondTrustCredentialClient.GetAccessToken(beyondTrustUrl).Result;
     client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 });
 builder.Services.AddTransient<IngestionService>();
