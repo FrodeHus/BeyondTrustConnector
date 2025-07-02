@@ -444,7 +444,7 @@ resource metricPublisherRoleDefinition 'Microsoft.Authorization/roleDefinitions@
 }
 
 resource metricPublisherRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
-  name: guid('metricPublisherRoleAssignment')
+  name: guid('metricPublisherRoleAssignment',principalId, dataCollectionRule.id)
   scope: dataCollectionRule
   properties: {
     roleDefinitionId: metricPublisherRoleDefinition.id
