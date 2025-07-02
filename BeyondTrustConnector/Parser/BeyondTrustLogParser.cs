@@ -12,9 +12,14 @@ internal class BeyondTrustLogParser(string log)
         foreach(var entry in parser.Entries)
         {
             var details = ParsePayload(entry.Payload);
+            if (!details.TryGetValue("when", out var when))
+            {
+                continue;
+            }
+            
             var beyondTrustLogEntry = new BeyondTrustLogEntryDto
             {
-                Timestamp = UnixTimeStampToDateTimeUTC(int.Parse(details["when"])),
+                Timestamp = UnixTimeStampToDateTimeUTC(int.Parse(when)),
                 CorrelationId = entry.CorrelationId,
                 SiteId = entry.SiteId,
                 SegmentId = entry.SegmentNumber,
