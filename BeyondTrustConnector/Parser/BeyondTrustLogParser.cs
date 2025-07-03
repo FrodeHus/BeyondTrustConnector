@@ -48,7 +48,11 @@ internal class BeyondTrustLogParser(string log)
         var payloadParser = new PayloadParser(payload);
         foreach (var (Key, Value) in payloadParser.Parse())
         {
-            details.Add(Key, Value);
+            if (!details.TryAdd(Key, Value))
+            {
+                // If the key already exists, append the value
+                details[Key] += $";{Value}";
+            }
         }
         return details;
     }
