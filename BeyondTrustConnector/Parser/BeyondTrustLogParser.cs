@@ -21,7 +21,7 @@ internal class BeyondTrustLogParser(string log, ILogger? logger)
             var beyondTrustLogEntry = new BeyondTrustLogEntryDto
             {
                 Timestamp = UnixTimeStampToDateTimeUtc(int.Parse(when)),
-                CorrelationId = entry.CorrelationId,
+                ProcessId = entry.ProcessId,
                 SiteId = entry.SiteId,
                 SegmentId = entry.SegmentNumber,
                 SegmentCount = entry.SegmentCount,

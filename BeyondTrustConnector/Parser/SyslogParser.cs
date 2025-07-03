@@ -6,7 +6,7 @@ namespace BeyondTrustConnector.Parser;
 
 internal partial class SyslogParser
 {
-    [GeneratedRegex(@"(?<month>[A-Za-z]{3})\s{1,2}(?<timestamp>\d{1,2}\s\d{2}:\d{2}:\d{2})\s(?<hostname>[a-z]+)\sBG\[(?<correlationId>\d{1,7})\]:\s(?<siteId>\d{1,5}):(?<segmentNumber>\d{2}):(?<segmentCount>\d{2}):(?<payload>.+)", RegexOptions.Compiled)]
+    [GeneratedRegex(@"(?<month>[A-Za-z]{3})\s{1,2}(?<timestamp>\d{1,2}\s\d{2}:\d{2}:\d{2})\s(?<hostname>[a-z]+)\sBG\[(?<processId>\d{1,7})\]:\s(?<siteId>\d{1,5}):(?<segmentNumber>\d{2}):(?<segmentCount>\d{2}):(?<payload>.+)", RegexOptions.Compiled)]
     private static partial Regex SyslogRegex();
     internal List<SyslogEntry> Entries { get; } = [];
     internal SyslogParser(string log)
@@ -14,18 +14,28 @@ internal partial class SyslogParser
         using var reader = new StringReader(log) ?? throw new ArgumentNullException(nameof(log));
         string? line;
         Dictionary<int, SyslogEntry> entries = new Dictionary<int, SyslogEntry>();
+        
         while ((line = reader.ReadLine()) != null)
         {
             var entry = Parse(line);
-            if (entry is not null && entries.TryGetValue(entry.CorrelationId, out var existingEntry))
+            if (entry is not null && entries.TryGetValue(entry.ProcessId, out var existingEntry))
             {
                 entry = Parse(line, existingEntry);
             }
+
+            if (entry is not null && entry.SegmentNumber == entry.SegmentCount)
+            {
+                Entries.Add(entry);
+                entries.Remove(entry.ProcessId);
+                continue;
+            }
             
             if(entry is not null)
-                entries[entry.CorrelationId] = entry;
+                entries[entry.ProcessId] = entry;
+            
         }
-        Entries = entries.Values.ToList();
+        if(entries.Count > 0)
+            Entries.AddRange(entries.Values.ToList());
         entries.Clear();
     }
 
@@ -45,7 +55,7 @@ internal partial class SyslogParser
         var month = match.Groups["month"].Value;
         var timestamp = match.Groups["timestamp"].Value;
         var hostname = match.Groups["hostname"].Value;
-        var correlationId = int.Parse(match.Groups["correlationId"].Value);
+        var processId = int.Parse(match.Groups["processId"].Value);
         var siteId = int.Parse(match.Groups["siteId"].Value);
         var segmentNumber = int.Parse(match.Groups["segmentNumber"].Value);
         var segmentCount = int.Parse(match.Groups["segmentCount"].Value);
@@ -60,7 +70,7 @@ internal partial class SyslogParser
         entry = new SyslogEntry
         {
             Hostname = hostname,
-            CorrelationId = correlationId,
+            ProcessId = processId,
             SiteId = siteId,
             SegmentNumber = segmentNumber,
             SegmentCount = segmentCount,
@@ -72,7 +82,7 @@ internal partial class SyslogParser
     internal class SyslogEntry
     {
         public required string Hostname { get; set; }
-        public int CorrelationId { get; set; }
+        public int ProcessId { get; set; }
         public int SiteId { get; set; }
         public int SegmentNumber { get; set; }
         public int SegmentCount { get; set; }

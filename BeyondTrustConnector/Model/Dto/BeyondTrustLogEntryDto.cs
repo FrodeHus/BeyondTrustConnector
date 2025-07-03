@@ -3,7 +3,7 @@
 public class BeyondTrustLogEntryDto
 {
     public DateTime Timestamp { get; set; }
-    public int CorrelationId { get; set; }
+    public int ProcessId { get; set; }
     public int SiteId { get; set; }
     public int SegmentId { get; set; }
     public int SegmentCount { get; set; }
