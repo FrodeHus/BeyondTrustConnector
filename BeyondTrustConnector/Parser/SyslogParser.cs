@@ -13,24 +13,20 @@ internal partial class SyslogParser
     {
         using var reader = new StringReader(log) ?? throw new ArgumentNullException(nameof(log));
         string? line;
-        SyslogEntry? entry = null;
+        Dictionary<int, SyslogEntry> entries = new Dictionary<int, SyslogEntry>();
         while ((line = reader.ReadLine()) != null)
         {
-            if (entry != null && entry.SegmentNumber != entry.SegmentCount)
+            var entry = Parse(line);
+            if (entry is not null && entries.TryGetValue(entry.CorrelationId, out var existingEntry))
             {
-                entry = Parse(line, entry);
+                entry = Parse(line, existingEntry);
             }
-            else
-            {
-                entry = Parse(line);
-            }
-
-            if (entry != null && entry.SegmentNumber == entry.SegmentCount)
-            {
-                Entries.Add(entry);
-            }
+            
+            if(entry is not null)
+                entries[entry.CorrelationId] = entry;
         }
-
+        Entries = entries.Values.ToList();
+        entries.Clear();
     }
 
     private static SyslogEntry? Parse(string line, SyslogEntry? entry = null)
