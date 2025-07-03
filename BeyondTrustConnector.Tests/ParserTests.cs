@@ -15,7 +15,7 @@ Dec 11 08:50:51 tenant BG[69065]: 1427:04:05:permissions:support:rdp:local=0;old
 Dec 11 08:50:51 tenant BG[69065]: 1427:05:05:y_name=Test User;old_permissions:jump_item_role:personal:id=1;old_permissions:jump_item_role:personal:name=No Access;old_public_display_name=Test User;old_rep_avatar=user photo deleted;old_permissions:jump_item_role:system:id=1;old_permissions:jump_item_role:system:name=No Access;old_external_id=@@@dGVzdC51c2VyQHRlbmFudC5ubw==
 Dec 10 07:04:11 tenant BG[12482]: 1427:01:01:event=login;site=tenant.beyondtrustcloud.com;status=success;target=web/login;when=1733810651;who=Test User (test@example.com) using saml;who_ip=12.3.4
 ";
-        var parser = new BeyondTrustLogParser(log);
+        var parser = new BeyondTrustLogParser(log, null);
         var events = parser.Parse();
         Assert.Equal(2, events.Count);
         Assert.Equal(101, events.First().AdditionalData.Count);
@@ -26,7 +26,7 @@ Dec 10 07:04:11 tenant BG[12482]: 1427:01:01:event=login;site=tenant.beyondtrust
     public void ItCanParseBeyondTrustLogEntries()
     {
         var log = @"Dec 10 07:04:11 tenant BG[12482]: 1427:01:01:event=login;site=tenant.beyondtrustcloud.com;status=success;target=web/login;when=1733810651;who=Test User (test@example.com) using saml;who_ip=12.3.4";
-        var parser = new BeyondTrustLogParser(log);
+        var parser = new BeyondTrustLogParser(log, null);
         var events = parser.Parse();
         Assert.Single(events);
         Assert.Equal(5, events.First().AdditionalData.Count);

@@ -34,7 +34,7 @@ namespace BeyondTrustConnector
                     await using var entryStream = entry.Open();
                     using var reportReader = new StreamReader(entryStream);
                     var reportContent = await reportReader.ReadToEndAsync();
-                    var parser = new BeyondTrustLogParser(reportContent);
+                    var parser = new BeyondTrustLogParser(reportContent, logger);
                     var events = parser.Parse();
                     if (lastEventTime.HasValue)
                     {

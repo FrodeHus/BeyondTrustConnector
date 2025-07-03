@@ -1,9 +1,10 @@
 ﻿
 using BeyondTrustConnector.Model.Dto;
+using Microsoft.Extensions.Logging;
 
 namespace BeyondTrustConnector.Parser;
 
-internal class BeyondTrustLogParser(string log)
+internal class BeyondTrustLogParser(string log, ILogger? logger)
 {
     public List<BeyondTrustLogEntryDto> Parse()
     {
@@ -19,7 +20,7 @@ internal class BeyondTrustLogParser(string log)
             
             var beyondTrustLogEntry = new BeyondTrustLogEntryDto
             {
-                Timestamp = UnixTimeStampToDateTimeUTC(int.Parse(when)),
+                Timestamp = UnixTimeStampToDateTimeUtc(int.Parse(when)),
                 CorrelationId = entry.CorrelationId,
                 SiteId = entry.SiteId,
                 SegmentId = entry.SegmentNumber,
@@ -35,23 +36,22 @@ internal class BeyondTrustLogParser(string log)
         return entries;
     }
 
-    private static DateTime UnixTimeStampToDateTimeUTC(long unixTimeStamp)
+    private static DateTime UnixTimeStampToDateTimeUtc(long unixTimeStamp)
     {
         DateTime dateTime = new(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
         dateTime = dateTime.AddSeconds(unixTimeStamp);
         return dateTime;
     }
 
-    private static Dictionary<string, string> ParsePayload(string payload)
+    private Dictionary<string, string> ParsePayload(string payload)
     {
         var details = new Dictionary<string, string>();
         var payloadParser = new PayloadParser(payload);
-        foreach (var (Key, Value) in payloadParser.Parse())
+        foreach (var (key, value) in payloadParser.Parse())
         {
-            if (!details.TryAdd(Key, Value))
+            if (!details.TryAdd(key, value))
             {
-                // If the key already exists, append the value
-                details[Key] += $";{Value}";
+                logger?.LogError($"Duplicate key: {key} - {value}");
             }
         }
         return details;
