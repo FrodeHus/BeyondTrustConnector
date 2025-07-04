@@ -6,21 +6,22 @@ namespace BeyondTrustConnector.Parser;
 
 internal partial class SyslogParser
 {
-    [GeneratedRegex(@"(?<month>[A-Za-z]{3})\s{1,2}(?<timestamp>\d{1,2}\s\d{2}:\d{2}:\d{2})\s(?<hostname>[a-z]+)\sBG\[(?<processId>\d{1,7})\]:\s(?<siteId>\d{1,5}):(?<segmentNumber>\d{2}):(?<segmentCount>\d{2}):(?<payload>.+)", RegexOptions.Compiled)]
+    [GeneratedRegex(
+        @"(?<month>[A-Za-z]{3})\s{1,2}(?<timestamp>\d{1,2}\s\d{2}:\d{2}:\d{2})\s(?<hostname>[a-z]+)\sBG\[(?<processId>\d{1,7})\]:\s(?<siteId>\d{1,5}):(?<segmentNumber>\d{2}):(?<segmentCount>\d{2}):(?<payload>.+)",
+        RegexOptions.Compiled)]
     private static partial Regex SyslogRegex();
+
     internal List<SyslogEntry> Entries { get; } = [];
+
     internal SyslogParser(string log)
     {
-        using var reader = new StringReader(log) ?? throw new ArgumentNullException(nameof(log));
-        string? line;
         Dictionary<int, SyslogEntry> entries = new Dictionary<int, SyslogEntry>();
-        
-        while ((line = reader.ReadLine()) != null)
+        foreach (ReadOnlySpan<char> line in log.SplitLines())
         {
-            var entry = Parse(line);
+            var entry = Parse(line.ToString());
             if (entry is not null && entries.TryGetValue(entry.ProcessId, out var existingEntry))
             {
-                entry = Parse(line, existingEntry);
+                entry = Parse(line.ToString(), existingEntry);
             }
 
             if (entry is not null && entry.SegmentNumber == entry.SegmentCount)
@@ -29,17 +30,17 @@ internal partial class SyslogParser
                 entries.Remove(entry.ProcessId);
                 continue;
             }
-            
-            if(entry is not null)
+
+            if (entry is not null)
                 entries[entry.ProcessId] = entry;
-            
         }
-        if(entries.Count > 0)
+
+        if (entries.Count > 0)
             Entries.AddRange(entries.Values.ToList());
         entries.Clear();
     }
 
-    private static SyslogEntry? Parse(string line, SyslogEntry? entry = null)
+    private static SyslogEntry? Parse(string? line, SyslogEntry? entry = null)
     {
         if (line == null)
         {
