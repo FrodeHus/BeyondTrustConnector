@@ -16,7 +16,7 @@ public class AccessSessionUpdater(BeyondTrustService beyondTrustService, Ingesti
         lastEventTime ??= DateTime.Now.AddDays(-5);
 
         var report = await beyondTrustService.GetAccessSessionReport(lastEventTime.Value);
-        if (report is null || report.Items.Count == 0)
+        if (report is null || report.Items.Count() == 0)
         {
             logger.LogInformation("No new access session data to ingest.");
             return;
