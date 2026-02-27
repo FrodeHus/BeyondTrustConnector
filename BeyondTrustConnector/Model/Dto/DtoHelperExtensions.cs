@@ -14,8 +14,8 @@
                 endTime = DateTimeOffset.Parse(endTimeValue);
             }
 
-            var jumpoint = session.jumpoint.Value;
-            var jumpItem = session.primary_customer.Value;
+            var jumpoint = session.jumpoint?.Value;
+            var jumpItem = session.primary_customer?.Value;
             var sessionType = session.session_type;
             return new BeyondTrustAccessSessionDto
             {
@@ -24,13 +24,13 @@
                 StartTime = startTime.UtcDateTime,
                 EndTime = endTime?.UtcDateTime,
                 Jumpoint = jumpoint,
-                JumpItemId = int.Parse(session.primary_customer.gsnumber),
+                JumpItemId = int.Parse(session.primary_customer?.gsnumber ?? "0"),
                 JumpItemAddress = jumpItem,
                 JumpGroup = jumpGroup,
-                JumpGroupId = int.Parse(session.jump_group.id),
-                FileDeleteCount = int.Parse(session.file_delete_count),
-                FileMoveCount = int.Parse(session.file_move_count),
-                FileTransferCount = int.Parse(session.file_transfer_count),
+                JumpGroupId = int.Parse(session.jump_group?.id ?? "0"),
+                FileDeleteCount = int.Parse(session.file_delete_count ?? "0"),
+                FileMoveCount = int.Parse(session.file_move_count ?? "0"),
+                FileTransferCount = int.Parse(session.file_transfer_count ?? "0"),
                 ChatDownloadUrl = session.session_chat_download_url,
                 ChatViewUrl = session.session_chat_view_url,
                 UserDetails = session.rep_list.Select(userDetails => new Dictionary<string, object>
