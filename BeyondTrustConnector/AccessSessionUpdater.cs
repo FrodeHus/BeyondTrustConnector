@@ -16,7 +16,13 @@ public class AccessSessionUpdater(BeyondTrustService beyondTrustService, Ingesti
         lastEventTime ??= DateTime.Now.AddDays(-5);
 
         var report = await beyondTrustService.GetAccessSessionReport(lastEventTime.Value);
-        var sessions = report.Items.Select(i => i.ToDto()).ToList();
+        if (report is null || report.Items.Count == 0)
+        {
+            logger.LogInformation("No new access session data to ingest.");
+            return;
+        }
+        
+        var sessions = report.Items.Where(i => i != null).Select(i => i.ToDto()).ToList();
         var existingSessions = await CheckIfSessionsAlreadyExists(queryService, sessions);
 
         var accessSessions = sessions.Where(s => !existingSessions.Contains(s.SessionId)).ToList();
